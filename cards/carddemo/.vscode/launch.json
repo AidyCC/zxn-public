@@ -1,0 +1,162 @@
+{
+    // Verwendet IntelliSense zum Ermitteln möglicher Attribute.
+    // Zeigen Sie auf vorhandene Attribute, um die zugehörigen Beschreibungen anzuzeigen.
+    // Weitere Informationen finden Sie unter https://go.microsoft.com/fwlink/?linkid=830387
+   
+    {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "type": "dezog",
+                "request": "launch",
+                "name": "Z80 Debugger",                
+                "remoteType": "cspect",      
+  // connect to the CSpect emulator via TCIP          
+                "cspect": 
+                {
+                        "hostname": "localhost",
+                        "port": 11000
+                },
+  // for when my next arrives i hope this works
+                "zxnext": 
+                {
+                        "baudrate": 230400,
+                        "port": "/dev/tty.usbserial"
+                },
+                "rootFolder": "${fileDirname}",
+                "listFiles": [
+                  {
+                      "path": "../obj/carddemo.lst",
+                      "useFiles": true,
+                      "asm": "../../../tools/sjasmplus",
+                      "mainFile": "../src/main.asm"
+                  }
+                ],
+                "disassemblerArgs": {
+                    "esxdosRst": true
+                },
+                "load": "../bin/carddemo.nex",
+                "skipInterrupt": false,
+                "startAutomatically": false
+            }
+        ]
+    }
+    /** "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "dezog",
+            "request": "launch",
+            "name": "Internal Simulator",
+            "remoteType": "zsim",
+            "zsim": {
+                "visualMemory": "ZX48"
+                //"Z80N": true,
+            },
+            "listFiles": [
+                {
+                    "path": "bin/starforc.list",
+                    "asm": "sjasmplus",
+                    "mainFile": "main.asm"
+                },
+                /*
+                {
+                    "path": "....../rom48.list",
+                    "asm": "z80asm",
+                    "srcDirs": []
+                }
+                */
+/**            ],
+            "history": {
+                "reverseDebugInstructionCount": 1000000,
+                "spotCount": 10,
+                "codeCoverageEnabled": true
+            },
+            "startAutomatically": true,
+            "skipInterrupt": true,
+            "commandsAfterLaunch": [
+                "-logpoint enable",
+                "-assert enable",
+                "-wpmem enable"
+            ],
+            "disassemblerArgs": {
+                "esxdosRst": true
+            },
+            "rootFolder": "${workspaceFolder}",
+            "topOfStack": "stack_top",
+            "load": "bin/starforc.sna",
+            "smallValuesMaximum": 513,
+            "tmpDir": ".tmp"
+        },
+
+        {
+            "type": "dezog",
+            "request": "launch",
+            "name": "ZEsarUX",
+            "remoteType": "zrcp",
+            "zrcp": {
+                "hostname": "localhost",
+                "port": 10000,
+                "loadDelay": 700
+                //"socketTimeout": 50
+            },
+            "listFiles": [
+                {
+                    "path": "bin/starforc.list",
+                    "asm": "sjasmplus",
+                    "mainFile": "main.asm"
+                }
+            ],
+            "history": {
+                "reverseDebugInstructionCount": 1000000,
+                "spotCount": 10,
+            },
+            "startAutomatically": true,
+            "skipInterrupt": true,
+            "commandsAfterLaunch": [
+                "-logpoint enable",
+                "-assert enable",
+                "-wpmem enable",
+                //"-sprites",
+                //"-patterns",
+            ],
+            "disassemblerArgs": {
+                "esxdosRst": true
+            },
+            "rootFolder": "${workspaceFolder}",
+            "topOfStack": "$FFFE",
+            "load": "bin/starforc.nex",
+            "smallValuesMaximum": 513,
+            "tmpDir": ".tmp"
+        },
+
+        {
+            "type": "dezog",
+            "request": "launch",
+            "name": "Unit Tests",
+            "unitTests": true,
+            "remoteType": "zsim",
+            //"remoteType": "cspect",
+            //"remoteType": "zrcp",
+            "resetOnLaunch": true,
+            "skipInterrupt": true,
+            "commandsAfterLaunch": [
+                "-wpmem enable",
+                "-assert enable",
+                "-logpoint enable", // Enable all logpoints, especially [UNITTEST]
+            ],
+            "disassemblerArgs": {
+                "esxdosRst": true
+            },
+            "listFiles": [
+                {
+                    "path": "bin/starforc.list",
+                    "asm": "$sjasmplus",
+                    "mainFile": "main.asm"
+                }
+            ],
+            "rootFolder": "${workspaceFolder}",
+            "load": "bin/starforc.sna",
+        },
+
+    ]
+}**/
