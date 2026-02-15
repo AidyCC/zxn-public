@@ -10,6 +10,8 @@ CODEBANK		EQU 0x10
 
 	ORG	0x8000
 
+	DEFINE	ZXN_CARDS_LIB
+	
 	include 	"../lib/cards.asm"		; must be on a 0x0100 Aligned Address
 
 bootStrap:   
@@ -17,12 +19,16 @@ bootStrap:
 	NEXTREG		0x50, CODEBANK
 	RST			RST0
 
-entryPoint	
-	CALL	initialise
+entryPoint
+	CALL		initialise
 	EI
-	JP		runCardTrick
+	CALL		runCardTrick
+	DI
+	NEXTREG		0x50, 0xFF
+	RST			RST0
 
 	include		"../../utils/src/utils.asm"
+	include		"../src/openingSequenceManagement.asm"
 	include 	"./src/trickManagement.asm"
 	include 	"./src/initManagement.asm"
 	include 	"./src/inputManagement.asm"

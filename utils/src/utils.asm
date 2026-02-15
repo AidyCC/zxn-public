@@ -1,3 +1,24 @@
+BLACK_INK			EQU %00000000
+BLUE_INK			EQU %00000001
+RED_INK				EQU %00000010
+MAGENTA_INK			EQU %00000011
+GREEN_INK			EQU %00000100
+CYAN_INK 			EQU %00000101
+YELLOW_INK 			EQU %00000110
+WHITE_INK 			EQU %00000111
+
+BLACK_PAPER			EQU BLACK_INK << 3
+BLUE_PAPER			EQU BLUE_INK << 3
+RED_PAPER			EQU RED_INK << 3
+MAGENTA_PAPER		EQU MAGENTA_INK << 3
+GREEN_PAPER			EQU GREEN_INK << 3
+CYAN_PAPER			EQU CYAN_INK << 3
+YELLOW_PAPER		EQU YELLOW_INK << 3
+WHITE_PAPER			EQU WHITE_INK << 3
+
+BRIGHT				EQU %01000000
+FLASH				EQU %10000000
+
 computeCharAddress
 	LD			L,A
 	LD			H,0
@@ -23,26 +44,16 @@ prntChar
 prntCharDblHgt
 	CALL		computeCharAddress
 	PUSH		DE
-	DUP 4
-		LD		A,(HL)
-		LD		(DE),A
-		INC		D
-		LD		(DE),A
-		INC		D
-		INC		HL
+	EX DE,HL
+	DUP 8
+		LD		A,(DE)
+		LD		(HL),A
+		PIXELDN
+		LD		(HL),A
+		PIXELDN
+		INC		DE
 	EDUP
-	DEC		D
-	EX		DE,HL
-	PIXELDN
-	EX		DE,HL
-	DUP 4
-		LD		A,(HL)
-		LD		(DE),A
-		INC		D
-		LD		(DE),A
-		INC		D
-		INC		HL
-	EDUP
+	EX DE,HL
 
 	POP			DE
 	LD			L,E
@@ -80,3 +91,65 @@ prntStringDblHgt:
 	INC			HL
 	DJNZ		.prntStringDblHgt
 	RET
+
+; requires a frames counter intremented every interrupt
+;
+waitForFrames
+	PUSH	BC
+	PUSH	HL
+	LD		B,A
+	LD		HL,frames
+.waitNxtInt
+	LD		C,(HL)
+.waitForFrame
+	LD		A,(HL)
+	SUB		C
+	CP		5
+	JR		C,.waitForFrame
+	DJNZ	.waitNxtInt
+	POP		HL
+	POP		BC
+	RET
+
+prntFadingString
+	PUSH	BC
+	PUSH	DE
+	CALL	prntStringDblHgt
+	POP		DE
+	POP		BC
+	LD		A,3
+	CALL	waitForFrames
+
+	LD		A,D
+	.3		RRCA
+	AND		%00000011
+	OR		%01011000
+	LD		D,A
+
+	LD		HL,fadeAttrSequence
+	LD		C,5
+.nxtInSequence
+	PUSH	BC
+	PUSH	DE
+	LD		A,3
+	CALL	waitForFrames
+.nxtByte
+	LD		A,(HL)
+	LD		(DE),A
+	ADD		DE,0x0020
+	LD		(DE),A
+	ADD		DE,-0x001F
+	DJNZ	.nxtByte
+	POP		DE
+	POP		BC
+	INC		HL
+	DEC		C
+	JR		NZ,.nxtInSequence
+	RET
+
+fadeAttrSequence
+	DEFB BRIGHT | BLACK_PAPER | WHITE_INK
+	DEFB BLACK_PAPER | WHITE_INK
+	DEFB BLACK_PAPER | CYAN_INK
+	DEFB BLACK_PAPER | BLUE_INK
+	DEFB BLACK_PAPER | BLACK_INK

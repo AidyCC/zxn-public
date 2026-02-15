@@ -10,6 +10,9 @@
 	
 	; include the cards library code
 	;
+
+	DEFINE		ZXN_CARDS_LIB
+	
 	include 	"../lib/cards.asm"		; must be on a 0x20 Aligned Address
 
 cardDemo

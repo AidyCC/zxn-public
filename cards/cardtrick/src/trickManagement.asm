@@ -1,5 +1,6 @@
 runCardTrick
 	CALL	setUpScreen
+	CALL	openingSequence
 	CALL	initialiseDeck
 .anotherRound
 	CALL	shuffleDeck
@@ -8,6 +9,10 @@ runCardTrick
 .nxtDeal
 	PUSH	BC
 	CALL	clearScreenInsideBorder
+    LD		DE,0x4850 - 16/2
+    LD		HL,dealingMessage
+    LD		B,16
+    CALL	prntFadingString
 	CALL	dealHand
 	CALL	makeSelection
 	CALL	collectHand
@@ -15,7 +20,14 @@ runCardTrick
 	DJNZ	.nxtDeal
 	CALL	selectMagicCard
 	JR		Z,.anotherRound
-	JR		$
+	CALL	clearScreenInsideBorder
+	LD		DE,0x4850 - 16/2
+	LD		HL,okByeForNowMessage
+	LD		B,16
+	CALL	prntFadingString
+	LD		A,8
+	CALL	waitForFrames
+	RET
 
 makeSelection
 	LD		DE,0x5090 - 30/2
@@ -32,6 +44,8 @@ makeSelection
 	AND		%00000111
 	JR		Z,.waitForChoice
 	LD		C,A
+	LD		A,(frames)
+	LD		R,A
 	XOR		A
 	LD		(HL),A
 .nxtShift
@@ -72,34 +86,9 @@ clearScreenInsideBorder
 	DJNZ	.clrNxtPixelLine
 	RET
 
-waitForFrames
-	PUSH	HL
-	LD		HL,frames
-	ADD		(HL)
-.waitForFrame
-	CP		(HL)
-	JR		C,.waitForFrame
-	POP		HL
-	RET
-
 setUpScreen
-	LD		HL,0x5800
-	LD		BC,0x2001
-	LD		DE,0x0001
-	CALL 	colourBar
-	ADD		HL,0x1F
-	LD		B,23
-	LD		DE,0x0020
-	CALL 	colourBar
-	ADD		HL,-0x21
-	LD		B,31
-	LD		DE,-0x0001
-	CALL 	colourBar
-	ADD		HL,-0x1F
-	LD		B,22
-	LD		DE,-0x0020
-	CALL 	colourBar
-	
+	LD		C,0x84
+	CALL	colourBorder
 	LD		DE,0x4000
 	LD		HL,TRborderGraphic
 	LD		B,0x08
@@ -158,6 +147,25 @@ setUpScreen
 	DJNZ	1B
 	RET
 
+colourBorder
+	LD		HL,0x5800
+	LD		B,0x20
+	LD		DE,0x0001
+	CALL 	colourBar
+	ADD		HL,0x1F
+	LD		B,23
+	LD		DE,0x0020
+	CALL 	colourBar
+	ADD		HL,-0x21
+	LD		B,31
+	LD		DE,-0x0001
+	CALL 	colourBar
+	ADD		HL,-0x1F
+	LD		B,22
+	LD		DE,-0x0020
+	CALL 	colourBar
+	RET
+
 animateBorder
 	LD		HL,animateBorderTicks
 	LD		A,(HL)
@@ -190,7 +198,7 @@ animateBorder
 	LDDR
 	LD		HL,DE
 	ADD		HL,-0x0020
-	LD		B,23
+	LD		B,22
 1:
 	LD		A,(HL)
 	LD		(DE),A
@@ -198,20 +206,24 @@ animateBorder
 	ADD		DE,-0x0020
 	DJNZ	1B
 	POP		AF
-	ADD		DE,0x0020
 	LD		(DE),A
 	RET
 
 colourBar
-	LD		(HL), C
+	LD		A,C
+	AND		%01111111
+	LD		(HL), A
 	ADD		HL,DE
 	CALL	setAndAdvanceColour
 	DJNZ	colourBar
 	RET
 
 setAndAdvanceColour
+	BIT		7,C
+	RET		NZ ; don’t advance (static colour)
 	INC		C
 	LD		A,C
+	AND		%01111111
 	CP		%00001000
 	RET		C
 	LD		C,0x01
@@ -234,6 +246,8 @@ dealHand
 	LD		A,(HL)
 	CALL	decodeCard
 	CALL	drawCard
+	LD		A,1
+	CALL	waitForFrames
 	POP		HL, BC
 	LD		A,C
 	ADD		0x04
@@ -291,6 +305,8 @@ collectHand
 	RET
 	
 selectMagicCard
+	LD		C,0x04
+	CALL	colourBorder
 	LD		HL,animateBorderTicks+1
 	LD		A,(HL)
 	DEC		HL
@@ -300,24 +316,30 @@ selectMagicCard
 	LD		HL,cardSelectedMessage
 	LD		B,28
 	CALL	prntStringDblHgt
-	LD		BC,0x0C07
+	LD		BC,0x0B07
 	LD		DE,0x0000
 	CALL	drawCard
-	LD		A,175
+	LD		A,25
 	CALL	waitForFrames
 	LD		A,(cardHand+10)
 	CALL	decodeCard
-	LD		BC,0x0C07
+	LD		BC,0x0D07
 	CALL	drawCard
-	LD		A,50*5
+	LD		A,40
 	CALL	waitForFrames
-	LD		DE,0x5090 - 20/2
+	LD		DE,0x5090 - 22/2
 	LD		HL,anotherGoMessage
-	LD		B,20
+	LD		B,22
 	CALL	prntString
+	LD		C,0x84
+	CALL	colourBorder
 	CALL	waitForYorN
+	PUSH	AF
 	LD		HL,animateBorderTicks+1
 	LD		(HL),0
+	LD		C,0x84
+	CALL	colourBorder
+	POP		AF
 	RET
 
 waitForEnter
@@ -326,6 +348,8 @@ waitForEnter
 	LD		A,(HL)
 	AND		1 << KEY_ENTER
 	JR		Z,.waitForEnter
+	;LD		A,(frames)
+	;LD		R,A
 	LD		(HL),0
 	RET
 
@@ -335,8 +359,10 @@ waitForYorN
 	LD		A,(HL)
 	AND		1 << KEY_Y | 1 << KEY_N
 	JR		Z,.waitForYorN
+	LD		A,(frames)
+	LD		R,A
+	BIT		KEY_N,(HL)			; return NZ if N pressed
 	LD		(HL),0
-	BIT		KEY_N,A			; return NZ if N pressed
 	RET
 
 animateBorderTicks
@@ -346,17 +372,20 @@ TRborderGraphic
 	DEFB	0x03, 0x0F, 0x1F, 0x38, 0x70, 0x70, 0xE0, 0xE0
 
 whichRowMessage
-	DEFM	%00000011, " Which Row Is Your Card In ?? "
+	DEFM	MAGENTA_INK, " Which Row Is Your Card In ?? "
 
 optionsMessage
-	DEFM	%10111001, "(1) Top (2)  Middle (3) Bottom"
+	DEFM	WHITE_PAPER | BLUE_INK, "(1) Top (2)  Middle (3) Bottom"
 
 cardSelectedMessage
-	DEFM	%00000110, "The Card You Selected Was :-"
+	DEFM	YELLOW_INK, "The Card You Selected Was :-"
 
 anotherGoMessage
-	DEFM	%10000101, "Another Go ? (Y / N)"
-
+	DEFM	FLASH | CYAN_INK, " Another Go ? (Y / N) "
+dealingMessage	
+	DEFM	YELLOW_INK, "Dealing Cards..."
+okByeForNowMessage
+	DEFM	MAGENTA_INK, "OK, Bye For Now!"
 startRowLookup
 	DEFB	0x02, 0x00, 0x01
 

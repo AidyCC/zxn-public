@@ -27,6 +27,8 @@ initialiseDeck
 
 shuffleDeck
 	LD		A,R
+	LD		B,A
+	AND		0x0F
 .nxtShuffle
 	PUSH	BC
 	CALL	doShuffleDeck
@@ -44,15 +46,6 @@ doShuffleDeck
 	LD		A,R
 	CP		52
 	JR		NC,.nxtRnd
-	;
-	; attempt to randomize a little
-	;
-	;XOR		L
-	;XOR		B
-	;LD		B,A
-;.rndDelay
-;	DJNZ	.rndDelay
-;	JR		.nxtRnd
 .idxValid
 	LD		B,C
 	LD		DE,cardDeck		; point DE at random indexed card
