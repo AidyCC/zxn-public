@@ -1,0 +1,120 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build cardtrick",
+      "type": "shell",
+      "command": "${workspaceFolder}/tools/sjasmplus",
+      "args": [
+        "--fullpath",
+        "--zxnext=cspect",
+        "--lstlab",
+        "--lst=./cards/obj/cardtrick.list",
+        "--sym=./cards/obj/cardtrick.labels",
+        "--raw=./cards/obj/cardtrick.bin",
+        "./cards/cardtrick/src/main.asm"
+      ],
+      "problemMatcher": [
+        {
+          "fileLocation": ["relative", "${workspaceFolder}"],
+          "pattern": {
+            "regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error):\\s+(.*)$",
+            "file": 1,
+            "line": 2,
+            "severity": 3,
+            "message": 4
+          }
+        }
+      ],
+      "group": "build",
+      "presentation": { "reveal": "always" }
+    },
+    {
+      "label": "Build carddemo",
+      "type": "shell",
+      "command": "${workspaceFolder}/tools/sjasmplus",
+      "args": [
+        "--fullpath",
+        "--zxnext=cspect",
+        "--lstlab",
+        "--lst=./cards/obj/carddemo.list",
+        "--sym=./cards/obj/carddemo.labels",
+        "--raw=./cards/obj/carddemo.bin",
+        "./cards/carddemo/src/main.asm"
+      ],
+      "problemMatcher": [
+        {
+          "fileLocation": ["relative", "${workspaceFolder}"],
+          "pattern": {
+            "regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error):\\s+(.*)$",
+            "file": 1,
+            "line": 2,
+            "severity": 3,
+            "message": 4
+          }
+        }
+      ],
+      "group": "build",
+      "presentation": { "reveal": "always" }
+    },
+    {
+      "label": "Build dotcmd",
+      "type": "shell",
+      "command": "${workspaceFolder}/tools/sjasmplus",
+      "args": [
+        "--fullpath",
+        "--zxnext=cspect",
+        "--lstlab",
+        "--lst=./cards/obj/dotcmd.list",
+        "--sym=./cards/obj/dotcmd.labels",
+        "--raw=./cards/obj/dotcmd.bin",
+        "./cards/dotcmd/src/main.asm"
+      ],
+      "problemMatcher": [
+        {
+          "fileLocation": ["relative", "${workspaceFolder}"],
+          "pattern": {
+            "regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error):\\s+(.*)$",
+            "file": 1,
+            "line": 2,
+            "severity": 3,
+            "message": 4
+          }
+        }
+      ],
+      "group": "build",
+      "presentation": { "reveal": "always" }
+    },
+    {
+      "label": "Deploy dotcmd",
+      "type": "shell",
+      "command": "${workspaceFolder}/tools/hdfmonkey",
+      "args": [
+        "put",
+        ".././zxn/emu/CSpect3_0_15_2/cspect-next-1gb.img",
+        "./cards/dot/CARD",
+        "/dot",
+      ],
+      "problemMatcher": [
+        {
+          "fileLocation": ["relative", "${workspaceFolder}"],
+          "pattern": {
+            "regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error):\\s+(.*)$",
+            "file": 1,
+            "line": 2,
+            "severity": 3,
+            "message": 4
+          }
+        }
+      ],
+      "group": "build",
+      "presentation": { "reveal": "always" }
+    },
+    {
+      "label": "Build all",
+      "dependsOn": ["Build carddemo", "Build cardtrick", "Build dotcmd", "Deploy dotcmd"],
+      "dependsOrder": "sequence",
+      "group": { "kind": "build", "isDefault": true }
+    }
+  ]
+}

@@ -12,7 +12,12 @@
 			DEFINE	ZXN_CARDS_LIB
 		ENDIF
 	ENDIF
-
+	
+	IFDEF ZXN_CARDS_DOT_CMD
+		IFNDEF ZXN_CARDS_LIB
+			DEFINE	ZXN_CARDS_LIB
+		ENDIF
+	ENDIF
 ; coverts a 1bpp byte into 4bpp format suitable for Tilemap
 
 TM_BLACK_CLR	EQU %00000000
@@ -504,23 +509,75 @@ cardBackData
 
 ; card value character data table
 ;
-characterDataLookup
-	; uses ROM character data for all except the "10"
-	;
-	DEFW	0x3E08				; "A"
-	DEFW	0x3D90				; "2"
-	DEFW	0x3D98				; "3"
-	DEFW	0x3DA0				; "4"
-	DEFW	0x3DA8				; "5"
-	DEFW	0x3DB0				; "6"
-	DEFW	0x3DB8				; "7"
-	DEFW	0x3DC0				; "8"
-	DEFW	0x3DC8				; "9"
-	DEFW	tenCharacterData	; "10"
-	DEFW	0x3E50				; "J"
-	DEFW	0x3E88				; "Q"
-	DEFW	0x3E58				; "K"
 
+	IFDEF	ZXN_CARDS_DOT_CMD
+aCharacterData
+		INCBIN	"../data/chardata.bin",("A"-0x20)*8,0x08
+twoCharacterData
+		INCBIN	"../data/chardata.bin",("2"-0x20)*8,0x08
+threeCharacterData
+		INCBIN	"../data/chardata.bin",("3"-0x20)*8,0x08
+fourCharacterData
+		INCBIN	"../data/chardata.bin",("4"-0x20)*8,0x08
+fiveCharacterData
+		INCBIN	"../data/chardata.bin",("5"-0x20)*8,0x08
+sixCharacterData
+		INCBIN	"../data/chardata.bin",("6"-0x20)*8,0x08
+sevenCharacterData
+		INCBIN	"../data/chardata.bin",("7"-0x20)*8,0x08
+eightCharacterData
+		INCBIN	"../data/chardata.bin",("8"-0x20)*8,0x08
+nineCharacterData
+		INCBIN	"../data/chardata.bin",("9"-0x20)*8,0x08		
+jackCharacterData
+		INCBIN	"../data/chardata.bin",("J"-0x20)*8,0x08
+queenCharacterData
+		INCBIN	"../data/chardata.bin",("Q"-0x20)*8,0x08
+kingCharacterData
+		INCBIN	"../data/chardata.bin",("K"-0x20)*8,0x08
+jCharacterData
+		INCBIN	"../data/chardata.bin",("J"-0x20)*8,0x08
+oCharacterData
+		INCBIN	"../data/chardata.bin",("O"-0x20)*8,0x08
+kCharacterData
+		INCBIN	"../data/chardata.bin",("K"-0x20)*8,0x08
+eCharacterData
+		INCBIN	"../data/chardata.bin",("E"-0x20)*8,0x08	
+rCharacterData
+		INCBIN	"../data/chardata.bin",("R"-0x20)*8,0x08
+	ENDIF
+characterDataLookup
+	IFDEF	ZXN_CARDS_DOT_CMD
+		DEFW	aCharacterData					; "A"
+		DEFW	twoCharacterData				; "2"
+		DEFW	threeCharacterData				; "3"
+		DEFW	fourCharacterData				; "4"
+		DEFW	fiveCharacterData				; "5"
+		DEFW	sixCharacterData				; "6"
+		DEFW	sevenCharacterData				; "7"
+		DEFW	eightCharacterData				; "8"
+		DEFW	nineCharacterData				; "9"
+		DEFW	tenCharacterData				; "10"
+		DEFW	jCharacterData					; "J"
+		DEFW	queenCharacterData				; "Q"
+		DEFW	kingCharacterData				; "K"
+	ELSE
+		; uses ROM character data for all except the "10"
+		;
+		DEFW	0x3E08				; "A"
+		DEFW	0x3D90				; "2"
+		DEFW	0x3D98				; "3"
+		DEFW	0x3DA0				; "4"
+		DEFW	0x3DA8				; "5"
+		DEFW	0x3DB0				; "6"
+		DEFW	0x3DB8				; "7"
+		DEFW	0x3DC0				; "8"
+		DEFW	0x3DC8				; "9"
+		DEFW	tenCharacterData	; "10"
+		DEFW	0x3E50				; "J"
+		DEFW	0x3E88				; "Q"
+		DEFW	0x3E58				; "K"
+	ENDIF
 ; symbol layout table
 ;
 symbolLayoutTable
@@ -748,7 +805,7 @@ doDrawCard
 	PUSH	BC          
 	INC		C           
 	DEC		C           	; ATTR	 FBPPPIII
-	LD		A,0x39       	;	%00111001 - Blue on White
+	LD		A,0x79       	;	%00111001 - Blue on White
 	JR		Z,drawCardBackground     	; branch if suit 0 (back of card)
 	BIT		0,C         
 	JR		NZ,redCard    
@@ -793,16 +850,28 @@ nonZeroSuit
 	LD		(IX+0x00),A	; FLAG_DEFAULT
 	CALL	drawCharacters
 	LD		B,0x00
-	LD		DE,0x3E50		; "J"
-	CALL	drawCornerCharacters
-	LD		E,0x78			; "O"
-	CALL	drawCornerCharacters
-	LD		E,0x58			; "K"
-	CALL	drawCornerCharacters
-	LD		E,0x28			; "E"
-	CALL	drawCornerCharacters
-	LD		E,0x90			; "R"
-	JP		drawCornerCharacters
+	IFDEF	ZXN_CARDS_DOT_CMD
+		LD		DE,jCharacterData		; "J"
+		CALL	drawCornerCharacters
+		LD		DE,oCharacterData		; "O"
+		CALL	drawCornerCharacters
+		LD		DE,kCharacterData		; "K"
+		CALL	drawCornerCharacters
+		LD		DE,eCharacterData		; "E"
+		CALL	drawCornerCharacters
+		LD		DE,rCharacterData		; "R"
+	ELSE
+		LD		DE,0x3E50		; "J"
+		CALL	drawCornerCharacters
+		LD		E,0x78			; "O"
+		CALL	drawCornerCharacters
+		LD		E,0x58			; "K"
+		CALL	drawCornerCharacters
+		LD		E,0x28			; "E"
+		CALL	drawCornerCharacters
+		LD		E,0x90			; "R"
+	ENDIF
+		JP		drawCornerCharacters
 nonZeroValue
 	PUSH	HL
 	PUSH	DE
@@ -860,7 +929,14 @@ notAceOfSpades
 	LD		HL,0x00C0		; 192 bytes per picture half (6 x 4 x 8)
 	LD		D,H
 	LD		E,A
-	CALL	0x30A9		; HL = HL * DE
+	IFDEF	ZXN_CARDS_DOT_CMD
+multHLDE
+		LD		D, L
+		MUL		D, E
+		LD		HL, DE
+	ELSE
+		CALL	0x30A9		; ROM Routine: L = HL * DE
+	ENDIF
 	LD		DE,pictureCardData - 0x0A80	; calculate picture card bitmap data address
 	ADD		HL,DE
 	EX		DE,HL

@@ -4,7 +4,7 @@
 ;	[mono] CSpect.exe -w4 -zxnext -nextrom -s28 -fps -60 -brk -map=../../cardTrick/bin/cardTrick.map ../../cardTrick/bin/cardTrick.nex
 ;
 	DEVICE		ZXSPECTRUMNEXT
-	CSPECTMAP	"../obj/cardTrick.map"
+	CSPECTMAP	"./cards/obj/cardTrick.map"
 	
 CODEBANK		EQU 0x10
 
@@ -12,7 +12,7 @@ CODEBANK		EQU 0x10
 
 	DEFINE	ZXN_CARDS_LIB
 	
-	include 	"../lib/cards.asm"		; must be on a 0x0100 Aligned Address
+	include 	"./cards/lib/cards.asm"		; must be on a 0x0100 Aligned Address
 
 bootStrap:   
 	DI
@@ -27,12 +27,12 @@ entryPoint
 	NEXTREG		0x50, 0xFF
 	RST			RST0
 
-	include		"../../utils/src/utils.asm"
-	include		"../src/openingSequenceManagement.asm"
-	include 	"./src/trickManagement.asm"
-	include 	"./src/initManagement.asm"
-	include 	"./src/inputManagement.asm"
-	include 	"./src/cardManagement.asm"
+	include		"./utils/src/utils.asm"
+	include		"./cards/cardtrick/src/openingSequenceManagement.asm"
+	include 	"./cards/cardtrick/src/trickManagement.asm"
+	include 	"./cards/cardtrick/src/initManagement.asm"
+	include 	"./cards/cardtrick/src/inputManagement.asm"
+	include 	"./cards/cardtrick/src/cardManagement.asm"
 
 	MMU 0, CODEBANK, 0x0000
 RST0:
@@ -78,7 +78,7 @@ RST7:
 frames
 		DEFB	0x00
 
-	SAVENEX 	OPEN "../nex/cardtrick.nex", bootStrap, 0xFFFF
+	SAVENEX 	OPEN "./cards/nex/cardtrick.nex", bootStrap, 0xFFFF
 	SAVENEX 	CORE 3, 0, 0
 	SAVENEX 	AUTO
 	SAVENEX 	CLOSE

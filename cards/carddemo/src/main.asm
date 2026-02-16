@@ -4,7 +4,7 @@
 ;	[mono] CSpect.exe -60 -vsync -fps carddemo.nex
 ;
 	DEVICE		ZXSPECTRUMNEXT
-	CSPECTMAP	"../obj/carddemo.map"
+	CSPECTMAP	"./cards/obj/carddemo.map"
 	
 	ORG	0x8000
 	
@@ -13,7 +13,7 @@
 
 	DEFINE		ZXN_CARDS_LIB
 	
-	include 	"../lib/cards.asm"		; must be on a 0x20 Aligned Address
+	include 	"./cards/lib/cards.asm"		; must be on a 0x0100 Aligned Address
 
 cardDemo
 	XOR		A
@@ -75,7 +75,7 @@ nxtSpCard
 	JR		NZ,nxtSpCard
 	RET
 
-	SAVENEX 	OPEN "../nex/carddemo.nex", cardDemo, 0xFFFF
+	SAVENEX 	OPEN "./cards/nex/carddemo.nex", cardDemo, 0xFFFF
 	SAVENEX 	CORE 3, 0, 0
 	SAVENEX 	AUTO
 	SAVENEX 	CLOSE
