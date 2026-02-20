@@ -398,6 +398,22 @@
  312+ 20BE ~            		DEFB BLACK_PAPER | BLACK_INK
  313+ 20BE              	ENDIF
  314+ 20BE
+ 315+ 20BE              	MACRO	INC_RAW fn, sb, n
+ 316+ 20BE ~            COUNT = n
+ 317+ 20BE ~            BNK_OFFSET = 0x00
+ 318+ 20BE ~            ADDR_OFFSET = 0x0000
+ 319+ 20BE ~            		WHILE COUNT > 0
+ 320+ 20BE ~            			MMU 6, sb + BNK_OFFSET, 0xC000
+ 321+ 20BE ~            			IF COUNT > 1
+ 322+ 20BE ~            				INCBIN fn, ADDR_OFFSET, 0x2000
+ 323+ 20BE ~            			ELSE
+ 324+ 20BE ~            				INCBIN fn, ADDR_OFFSET
+ 325+ 20BE ~            			ENDIF
+ 326+ 20BE ~            ADDR_OFFSET=ADDR_OFFSET + 0x2000
+ 327+ 20BE ~            BNK_OFFSET=BNK_OFFSET+0x01
+ 328+ 20BE ~            COUNT=COUNT-1
+ 329+ 20BE ~            		ENDW
+ 330+ 20BE              	ENDM
 # file closed: utils/src/utils.asm
   29  20BE
   30  20BE              commandLinePresent:

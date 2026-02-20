@@ -152,12 +152,13 @@ selectMagicCard
 	LD		BC,0x0B07
 	LD		DE,0x0000
 	CALL	drawCard
-	LD		A,25
-	CALL	waitForFrames
+	CALL	playDrumRoll
+	CALL	waitWhileSoundBusy
 	LD		A,(cardHand+MAGIC_CARD_OFFSET)
 	CALL	decodeCard
 	LD		BC,0x0D07
 	CALL	drawCard
+	CALL	playTada
 	LD		A,40
 	CALL	waitForFrames
 	LD		DE,0x5090 - 22/2

@@ -52,7 +52,8 @@ ctc_init:
 		; Don't need CTC interrupts if no sound
 		NEXTREG INTEN1,%00000000						; Disable CTC Interrupts
 	ELSE
-		NEXTREG INTEN1,%00000011						; Enable CTC Interrupt on Channel 0 & 1
+		NEXTREG INTEN1,%00000001						; Enable CTC Interrupt on Channel 0 Only
+		;NEXTREG INTEN1,%00000011						; Enable CTC Interrupt on Channel 0 & 1
 	
 ;---------------------------------------------------------------------------------------------------------
 ; CTC Control Word Bits
@@ -69,12 +70,12 @@ ctc_init:
 		; INT
 		; Timer
 		; 16 Prescaler
-		; Rising Edge
+		; Falling Edge
 		; Trigger On Count Load
 		; Time Constraint Follows
-		; Software Reset
+		; Continued Operaion
 		; Control Word
-		INIT_CTC	CTC0, %00010111, 56	; Base Timer for Sound Tempo.  28Mhz / (16 * 176) = 9.94318Khz
+		INIT_CTC	CTC0, %10000101, 56	; Base Timer for Sound Tempo.  28Mhz / (16 * 56) = 31250Hz
 
 		; INT
 		; Timer
@@ -84,10 +85,11 @@ ctc_init:
 		; Time Constraint Follows
 		; Continued Operaion
 		; Control Word
-		INIT_CTC	CTC1, %10101101, 192	; 9.94318Khz / 38 = 261.6626316hz ???
+		;INIT_CTC	CTC1, %10101101, 192
 
 		LD      A,high vector_table
 		LD      I,A
 		IM      2
+		EI
 	ENDIF	; DISABLE_SOUND
     RET

@@ -8,6 +8,7 @@
 	
 CODEBANK		EQU 0x10
 
+
 	ORG	0x8000
 
 	DEFINE	ZXN_CARDS_LIB
@@ -29,7 +30,6 @@ CARD_START_X		EQU	16 - ((HORIZ_STEP*CARDS_PER_ROW)/2)
 
 entryPoint
 	CALL		initialise
-	EI
 	CALL		runCardTrick
 	DI
 	NEXTREG		0x50, 0xFF
@@ -89,6 +89,11 @@ RST7:
 		RETI
 frames
 		DEFB	0x00
+
+	; filname, start bank, number of 8k banks to include
+	;
+	INC_RAW "./cards/data/short_dr.raw", SNDDRBANK, 28
+	INC_RAW "./cards/data/tada.raw", SNDTADABANK, 27
 
 	SAVENEX 	OPEN "./cards/nex/cardtrick.nex", bootStrap, 0xFFFF
 	SAVENEX 	CORE 3, 0, 0
