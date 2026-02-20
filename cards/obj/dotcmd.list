@@ -409,9 +409,9 @@
  323+ 20BE ~            			ELSE
  324+ 20BE ~            				INCBIN fn, ADDR_OFFSET
  325+ 20BE ~            			ENDIF
- 326+ 20BE ~            ADDR_OFFSET=ADDR_OFFSET + 0x2000
- 327+ 20BE ~            BNK_OFFSET=BNK_OFFSET+0x01
- 328+ 20BE ~            COUNT=COUNT-1
+ 326+ 20BE ~            ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 327+ 20BE ~            BNK_OFFSET = BNK_OFFSET + 0x01
+ 328+ 20BE ~            COUNT = COUNT - 0x01
  329+ 20BE ~            		ENDW
  330+ 20BE              	ENDM
 # file closed: utils/src/utils.asm

@@ -7297,9 +7297,9 @@
  323+ 8FE2 ~            			ELSE
  324+ 8FE2 ~            				INCBIN fn, ADDR_OFFSET
  325+ 8FE2 ~            			ENDIF
- 326+ 8FE2 ~            ADDR_OFFSET=ADDR_OFFSET + 0x2000
- 327+ 8FE2 ~            BNK_OFFSET=BNK_OFFSET+0x01
- 328+ 8FE2 ~            COUNT=COUNT-1
+ 326+ 8FE2 ~            ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 327+ 8FE2 ~            BNK_OFFSET = BNK_OFFSET + 0x01
+ 328+ 8FE2 ~            COUNT = COUNT - 0x01
  329+ 8FE2 ~            		ENDW
  330+ 8FE2              	ENDM
 # file closed: utils/src/utils.asm
@@ -8530,252 +8530,252 @@
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
   95  E000             >			ELSE
   95  E000 ~           >				INCBIN fn, ADDR_OFFSET
   95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  E000             >COUNT=COUNT-1
+  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  E000             >COUNT = COUNT - 0x01
   95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
   95  C000             >			IF COUNT > 1
   95  C000 ~           >				INCBIN fn, ADDR_OFFSET, 0x2000
   95  C000             >			ELSE
   95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET
   95  CBA0             >			ENDIF
-  95  CBA0             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  95  CBA0             >BNK_OFFSET=BNK_OFFSET+0x01
-  95  CBA0             >COUNT=COUNT-1
+  95  CBA0             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  95  CBA0             >BNK_OFFSET = BNK_OFFSET + 0x01
+  95  CBA0             >COUNT = COUNT - 0x01
   95  CBA0             >		ENDW
   96  CBA0              	INC_RAW "./cards/data/tada.raw", SNDTADABANK, 27
   96  CBA0             >COUNT = 27
@@ -8788,243 +8788,243 @@
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
   96  E000             >			ELSE
   96  E000 ~           >				INCBIN fn, ADDR_OFFSET
   96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  E000             >COUNT=COUNT-1
+  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  E000             >COUNT = COUNT - 0x01
   96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
   96  C000             >			IF COUNT > 1
   96  C000 ~           >				INCBIN fn, ADDR_OFFSET, 0x2000
   96  C000             >			ELSE
   96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET
   96  DF2E             >			ENDIF
-  96  DF2E             >ADDR_OFFSET=ADDR_OFFSET + 0x2000
-  96  DF2E             >BNK_OFFSET=BNK_OFFSET+0x01
-  96  DF2E             >COUNT=COUNT-1
+  96  DF2E             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+  96  DF2E             >BNK_OFFSET = BNK_OFFSET + 0x01
+  96  DF2E             >COUNT = COUNT - 0x01
   96  DF2E             >		ENDW
   97  DF2E
   98  DF2E              	SAVENEX 	OPEN "./cards/nex/cardtrick.nex", bootStrap, 0xFFFF
