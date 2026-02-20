@@ -22,24 +22,12 @@ startUp:
 show_usage
 	LD      HL,helpMessage					; show help text 
 	call    printRST16						; print message 
-	jp      endOut			
+	jp      abortOut			
 	
 	DEFINE		NO_FRAMES
 	include 	"./utils/src/utils.asm"	
-	DEFINE		ARG_PARAMS_DEHL
-	include 	"./utils/src/arguments.asm"											
 
 commandLinePresent: 
-	PUSH    AF, BC, DE, HL, IX				; save std regs 
-	;BREAK
-	;ld      de,varname
-	;LD		(CH_ADD),HL
-    ;call    get_sizedarg     
-	;ld      (var_len),bc 
-       
-	;CALL48K	0x24FB       
-	;CALL48K	0x2DD5    
-	BREAK
 	CALL	readArgument					; read x
 	JR		C,abortOut
 	LD		B,E								; save x in B
@@ -76,9 +64,7 @@ argumentOutOfRange
 argumentsValid
 	CALL	drawCard						; draw the card
 abortOut:
-	POP     IX, HL, DE, BC, AF				; restore std regs    
-endOut: 
-    RET										; exit 
+	RET										; exit 
 
 readArgument
 	CALL	readInteger						; read x
@@ -102,11 +88,13 @@ invalidInteger
 
 readInteger
 	LD		DE,0x0000
-readNxtDigit
+.readNxtDigit
 	LD		A,(HL)
 	INC		HL
 	AND		A
 	RET		Z
+	CP		0x20
+	JR 		Z,.readNxtDigit	; skip spaces
 	CP		0x0D
 	RET		Z
 	CP		","
@@ -122,108 +110,8 @@ readNxtDigit
 	MUL		D, E
 	ADD		E
 	LD		E, A
-	JR		readNxtDigit
+	JR		.readNxtDigit
 	
-		ld      de,filename
-        call    get_sizedarg            ; get first argument to filename
-        JP      nc,show_usage           ; if none, just go to show usage
-        ld      (command_len),bc        ; store command length
-        ld      de,varname
-        call    get_sizedarg            ; get second argument to varname
-        JP      nc,show_usage           ; if none, just go to show usage
-        ld      (var_len),bc            ; store variable name length
-        ld      de,varname
-        ex      de,hl
-        add     hl,bc
-        dec     hl
-        ex      de,hl
-        ld      a,(de)
-        cp      '$'                     ; last char must be '$'
-        JP      nz,show_usage
-        ld      de,0                    ; further args to ROM
-        call    get_sizedarg            ; check if any further args
-        JP		C,show_usage
-		jr      nc,string_start         ; okay if not
-
-string_start:
-        ld      bc,(var_len)
-        inc     bc
-        CALL48K EXPT_1NUM            ; reserve space for variable name
-        dec     bc
-        ld      hl,varname
-        push    de
-        ldir                            ; copy name to workspace
-        ld      a,','                   ; append a delimiter
-        ld      (de),a
-        ld      hl,(CH_ADD)
-        ex      (sp),hl
-        ld      (CH_ADD),hl             ; set var name as interpretation pointer
-        CALL48K LOOK_VARS_r3            ; search for the variable
-        pop     de
-        ld      (CH_ADD),de             ; restore interpretation pointer
-        jr      nc,var_found
-        CALL48K REPORT_2_r3             ; 2 Variable not found
-var_found:
-        ld      a,b
-        and     %11100000
-        cp      %01000000               ; must be a simple string
-        jr      z,string_found
-        CALL48K REPORT_A_r3             ; A Invalid argument
-string_found:
-        inc     hl
-        ld      c,(hl)
-        inc     hl
-        ld      b,(hl)                  ; BC=string length
-        inc     hl                      ; HL=string address
-trimstring:
-        ld      a,b
-        or      c
-        jr      z,gotstring
-        ld      a,(hl)
-        cp      ' '
-        jr      nz,gotstring            ; on when non-space encountered
-        inc     hl                      ; trim the space
-        dec     bc
-        jr      trimstring
-gotstring:
-        ld      (string_len),bc         ; save string length
-        inc     bc                      ; increment length for terminator
-        ld      (string_addr),de        ; save start of string in workspace
-        ldir                            ; copy string+1 byte
-        RET
-
-
-; ***************************************************************************
-; * Custom error generation                                                 *
-; ***************************************************************************
-
-err_custom:
-        xor     a                       ; A=0, custom error
-        scf                             ; Fc=1, error condition
-        ; fall through to exit_error
-
-; ***************************************************************************
-; * Close file and exit with any error condition                            *
-; ***************************************************************************
-
-exit_error:
-        ret
-
-;------------------------------------------------------------------------------
-; Data 
-
-command_len
-	DEFW	0x00
-var_len
-	DEFW	0x00
-string_len
-	DEFW	0x00
-string_addr
-	DEFW	0x0000
-varname
-	DEFS	0x20, 0x00
-filename
-	DEFS	0x20, 0x00
 helpMessage
 	DEFM	"card - v1.0 by AidyC",13
 	DEFM	"Draws A Playing Card.",13,13
