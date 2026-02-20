@@ -170,250 +170,252 @@
  139+ 2019              iy_PFLAG        equ     P_FLAG-ERR_NR
  140+ 2019              iy_MEMBOT       equ     MEMBOT-ERR_NR
  141+ 2019
- 142+ 2019              BLACK_INK			EQU %00000000
- 143+ 2019              BLUE_INK			EQU %00000001
- 144+ 2019              RED_INK				EQU %00000010
- 145+ 2019              MAGENTA_INK			EQU %00000011
- 146+ 2019              GREEN_INK			EQU %00000100
- 147+ 2019              CYAN_INK 			EQU %00000101
- 148+ 2019              YELLOW_INK 			EQU %00000110
- 149+ 2019              WHITE_INK 			EQU %00000111
- 150+ 2019
- 151+ 2019              BLACK_PAPER			EQU BLACK_INK << 3
- 152+ 2019              BLUE_PAPER			EQU BLUE_INK << 3
- 153+ 2019              RED_PAPER			EQU RED_INK << 3
- 154+ 2019              MAGENTA_PAPER		EQU MAGENTA_INK << 3
- 155+ 2019              GREEN_PAPER			EQU GREEN_INK << 3
- 156+ 2019              CYAN_PAPER			EQU CYAN_INK << 3
- 157+ 2019              YELLOW_PAPER		EQU YELLOW_INK << 3
- 158+ 2019              WHITE_PAPER			EQU WHITE_INK << 3
- 159+ 2019
- 160+ 2019              BRIGHT				EQU %01000000
- 161+ 2019              FLASH				EQU %10000000
- 162+ 2019
- 163+ 2019              	MACRO CALL48K address
- 164+ 2019 ~                    RST     $18
- 165+ 2019 ~                    DEFW	address
- 166+ 2019              	ENDM
- 167+ 2019
- 168+ 2019              printRST16
- 169+ 2019 7E           	LD		A,(HL)
- 170+ 201A A7           	AND 	A
- 171+ 201B C8           	RET		Z
- 172+ 201C D7           	RST		0x10
- 173+ 201D 23           	INC		HL
- 174+ 201E 18 F9        	JR		printRST16
- 175+ 2020
- 176+ 2020              computeCharAddress
- 177+ 2020 6F           	LD			L,A
- 178+ 2021 26 00        	LD			H,0
- 179+ 2023 29          > ADD HL,HL
- 179+ 2024 29          > ADD HL,HL
- 179+ 2025 29          > ADD HL,HL
- 180+ 2026 ED 34 00 3C  	ADD			HL,0x3C00
- 181+ 202A C9           	RET
- 182+ 202B
- 183+ 202B              prntChar
- 184+ 202B CD 20 20     	CALL		computeCharAddress
- 185+ 202E D5           	PUSH		DE
- 186+ 202F ED A5       > LDWS
- 186+ 2031 ED A5       > LDWS
- 186+ 2033 ED A5       > LDWS
- 186+ 2035 ED A5       > LDWS
- 186+ 2037 ED A5       > LDWS
- 186+ 2039 ED A5       > LDWS
- 186+ 203B ED A5       > LDWS
- 186+ 203D ED A5       > LDWS
- 187+ 203F D1           	POP			DE
- 188+ 2040 6B           	LD			L,E
- 189+ 2041 7A           	LD			A,D
- 190+ 2042 0F          > RRCA
- 190+ 2043 0F          > RRCA
- 190+ 2044 0F          > RRCA
- 191+ 2045 E6 03        	AND			%00000011
- 192+ 2047 F6 58        	OR			%01011000
- 193+ 2049 67           	LD			H,A
- 194+ 204A 71           	LD			(HL),C
- 195+ 204B 1C           	INC			E
- 196+ 204C C9           	RET
- 197+ 204D
- 198+ 204D              prntCharDblHgt
- 199+ 204D CD 20 20     	CALL		computeCharAddress
- 200+ 2050 D5           	PUSH		DE
- 201+ 2051 EB           	EX DE,HL
- 202+ 2052              	DUP 8
- 203+ 2052 1A          >		LD		A,(DE)
- 204+ 2053 77          >		LD		(HL),A
- 205+ 2054 ED 93       >		PIXELDN
- 206+ 2056 77          >		LD		(HL),A
- 207+ 2057 ED 93       >		PIXELDN
- 208+ 2059 13          >		INC		DE
- 203+ 205A 1A          >		LD		A,(DE)
- 204+ 205B 77          >		LD		(HL),A
- 205+ 205C ED 93       >		PIXELDN
- 206+ 205E 77          >		LD		(HL),A
- 207+ 205F ED 93       >		PIXELDN
- 208+ 2061 13          >		INC		DE
- 203+ 2062 1A          >		LD		A,(DE)
- 204+ 2063 77          >		LD		(HL),A
- 205+ 2064 ED 93       >		PIXELDN
- 206+ 2066 77          >		LD		(HL),A
- 207+ 2067 ED 93       >		PIXELDN
- 208+ 2069 13          >		INC		DE
- 203+ 206A 1A          >		LD		A,(DE)
- 204+ 206B 77          >		LD		(HL),A
- 205+ 206C ED 93       >		PIXELDN
- 206+ 206E 77          >		LD		(HL),A
- 207+ 206F ED 93       >		PIXELDN
- 208+ 2071 13          >		INC		DE
- 203+ 2072 1A          >		LD		A,(DE)
- 204+ 2073 77          >		LD		(HL),A
- 205+ 2074 ED 93       >		PIXELDN
- 206+ 2076 77          >		LD		(HL),A
- 207+ 2077 ED 93       >		PIXELDN
- 208+ 2079 13          >		INC		DE
- 203+ 207A 1A          >		LD		A,(DE)
- 204+ 207B 77          >		LD		(HL),A
- 205+ 207C ED 93       >		PIXELDN
- 206+ 207E 77          >		LD		(HL),A
- 207+ 207F ED 93       >		PIXELDN
- 208+ 2081 13          >		INC		DE
- 203+ 2082 1A          >		LD		A,(DE)
- 204+ 2083 77          >		LD		(HL),A
- 205+ 2084 ED 93       >		PIXELDN
- 206+ 2086 77          >		LD		(HL),A
- 207+ 2087 ED 93       >		PIXELDN
- 208+ 2089 13          >		INC		DE
- 203+ 208A 1A          >		LD		A,(DE)
- 204+ 208B 77          >		LD		(HL),A
- 205+ 208C ED 93       >		PIXELDN
- 206+ 208E 77          >		LD		(HL),A
- 207+ 208F ED 93       >		PIXELDN
- 208+ 2091 13          >		INC		DE
- 209+ 2092              	EDUP
- 210+ 2092 EB           	EX DE,HL
- 211+ 2093
- 212+ 2093 D1           	POP			DE
- 213+ 2094 6B           	LD			L,E
- 214+ 2095 7A           	LD			A,D
- 215+ 2096 0F          > RRCA
- 215+ 2097 0F          > RRCA
- 215+ 2098 0F          > RRCA
- 216+ 2099 E6 03        	AND			%00000011
- 217+ 209B F6 58        	OR			%01011000
- 218+ 209D 67           	LD			H,A
- 219+ 209E 71           	LD			(HL),C
- 220+ 209F ED 34 20 00  	ADD			HL,0x0020
- 221+ 20A3 71           	LD			(HL),C
- 222+ 20A4 1C           	INC			E
- 223+ 20A5 C9           	RET
- 224+ 20A6
- 225+ 20A6              prntString:
- 226+ 20A6 4E           	LD			C,(HL)
- 227+ 20A7 23           	INC			HL
- 228+ 20A8              .prntString
- 229+ 20A8 E5           	PUSH		HL
- 230+ 20A9 7E           	LD			A,(HL)
- 231+ 20AA CD 2B 20     	CALL		prntChar
- 232+ 20AD E1           	POP			HL
- 233+ 20AE 23           	INC			HL
- 234+ 20AF 10 F7        	DJNZ		.prntString
- 235+ 20B1 C9           	RET
- 236+ 20B2
- 237+ 20B2              prntStringDblHgt:
- 238+ 20B2 4E           	LD			C,(HL)
- 239+ 20B3 23           	INC			HL
- 240+ 20B4              .prntStringDblHgt
- 241+ 20B4 E5           	PUSH		HL
- 242+ 20B5 7E           	LD			A,(HL)
- 243+ 20B6 CD 4D 20     	CALL		prntCharDblHgt
- 244+ 20B9 E1           	POP			HL
- 245+ 20BA 23           	INC			HL
- 246+ 20BB 10 F7        	DJNZ		.prntStringDblHgt
- 247+ 20BD C9           	RET
- 248+ 20BE
- 249+ 20BE              	IFNDEF NO_FRAMES
- 250+ 20BE ~            ; requires a frames counter intremented every interrupt
- 251+ 20BE ~            ;
- 252+ 20BE ~            waitForFrames
- 253+ 20BE ~            		PUSH	BC
- 254+ 20BE ~            		PUSH	HL
- 255+ 20BE ~            		LD		B,A
- 256+ 20BE ~            		LD		HL,frames
- 257+ 20BE ~            .waitNxtInt
- 258+ 20BE ~            		LD		C,(HL)
- 259+ 20BE ~            .waitForFrame
- 260+ 20BE ~            		LD		A,(HL)
- 261+ 20BE ~            		SUB		C
- 262+ 20BE ~            		CP		5
- 263+ 20BE ~            		JR		C,.waitForFrame
- 264+ 20BE ~            		DJNZ	.waitNxtInt
- 265+ 20BE ~            		POP		HL
- 266+ 20BE ~            		POP		BC
- 267+ 20BE ~            		RET
- 268+ 20BE              	ENDIF
- 269+ 20BE
- 270+ 20BE              	IFNDEF NO_FRAMES
- 271+ 20BE ~            prntFadingString
- 272+ 20BE ~            		PUSH	BC
- 273+ 20BE ~            		PUSH	DE
- 274+ 20BE ~            		CALL	prntStringDblHgt
- 275+ 20BE ~            		POP		DE
- 276+ 20BE ~            		POP		BC
- 277+ 20BE ~            		LD		A,3
- 278+ 20BE ~            		CALL	waitForFrames
- 279+ 20BE ~
- 280+ 20BE ~            		LD		A,D
- 281+ 20BE ~            		.3		RRCA
- 282+ 20BE ~            		AND		%00000011
- 283+ 20BE ~            		OR		%01011000
- 284+ 20BE ~            		LD		D,A
- 285+ 20BE ~
- 286+ 20BE ~            		LD		HL,fadeAttrSequence
- 287+ 20BE ~            		LD		C,5
- 288+ 20BE ~            .nxtInSequence
- 289+ 20BE ~            		PUSH	BC
- 290+ 20BE ~            		PUSH	DE
- 291+ 20BE ~            		LD		A,3
- 292+ 20BE ~            		CALL	waitForFrames
- 293+ 20BE ~            .nxtByte
- 294+ 20BE ~            		LD		A,(HL)
- 295+ 20BE ~            		LD		(DE),A
- 296+ 20BE ~            		ADD		DE,0x0020
+ 142+ 2019              TURBO_CONTROL_NR_07             equ $07
+ 143+ 2019
+ 144+ 2019              BLACK_INK			EQU %00000000
+ 145+ 2019              BLUE_INK			EQU %00000001
+ 146+ 2019              RED_INK				EQU %00000010
+ 147+ 2019              MAGENTA_INK			EQU %00000011
+ 148+ 2019              GREEN_INK			EQU %00000100
+ 149+ 2019              CYAN_INK 			EQU %00000101
+ 150+ 2019              YELLOW_INK 			EQU %00000110
+ 151+ 2019              WHITE_INK 			EQU %00000111
+ 152+ 2019
+ 153+ 2019              BLACK_PAPER			EQU BLACK_INK << 3
+ 154+ 2019              BLUE_PAPER			EQU BLUE_INK << 3
+ 155+ 2019              RED_PAPER			EQU RED_INK << 3
+ 156+ 2019              MAGENTA_PAPER		EQU MAGENTA_INK << 3
+ 157+ 2019              GREEN_PAPER			EQU GREEN_INK << 3
+ 158+ 2019              CYAN_PAPER			EQU CYAN_INK << 3
+ 159+ 2019              YELLOW_PAPER		EQU YELLOW_INK << 3
+ 160+ 2019              WHITE_PAPER			EQU WHITE_INK << 3
+ 161+ 2019
+ 162+ 2019              BRIGHT				EQU %01000000
+ 163+ 2019              FLASH				EQU %10000000
+ 164+ 2019
+ 165+ 2019              	MACRO CALL48K address
+ 166+ 2019 ~                    RST     $18
+ 167+ 2019 ~                    DEFW	address
+ 168+ 2019              	ENDM
+ 169+ 2019
+ 170+ 2019              printRST16
+ 171+ 2019 7E           	LD		A,(HL)
+ 172+ 201A A7           	AND 	A
+ 173+ 201B C8           	RET		Z
+ 174+ 201C D7           	RST		0x10
+ 175+ 201D 23           	INC		HL
+ 176+ 201E 18 F9        	JR		printRST16
+ 177+ 2020
+ 178+ 2020              computeCharAddress
+ 179+ 2020 6F           	LD			L,A
+ 180+ 2021 26 00        	LD			H,0
+ 181+ 2023 29          > ADD HL,HL
+ 181+ 2024 29          > ADD HL,HL
+ 181+ 2025 29          > ADD HL,HL
+ 182+ 2026 ED 34 00 3C  	ADD			HL,0x3C00
+ 183+ 202A C9           	RET
+ 184+ 202B
+ 185+ 202B              prntChar
+ 186+ 202B CD 20 20     	CALL		computeCharAddress
+ 187+ 202E D5           	PUSH		DE
+ 188+ 202F ED A5       > LDWS
+ 188+ 2031 ED A5       > LDWS
+ 188+ 2033 ED A5       > LDWS
+ 188+ 2035 ED A5       > LDWS
+ 188+ 2037 ED A5       > LDWS
+ 188+ 2039 ED A5       > LDWS
+ 188+ 203B ED A5       > LDWS
+ 188+ 203D ED A5       > LDWS
+ 189+ 203F D1           	POP			DE
+ 190+ 2040 6B           	LD			L,E
+ 191+ 2041 7A           	LD			A,D
+ 192+ 2042 0F          > RRCA
+ 192+ 2043 0F          > RRCA
+ 192+ 2044 0F          > RRCA
+ 193+ 2045 E6 03        	AND			%00000011
+ 194+ 2047 F6 58        	OR			%01011000
+ 195+ 2049 67           	LD			H,A
+ 196+ 204A 71           	LD			(HL),C
+ 197+ 204B 1C           	INC			E
+ 198+ 204C C9           	RET
+ 199+ 204D
+ 200+ 204D              prntCharDblHgt
+ 201+ 204D CD 20 20     	CALL		computeCharAddress
+ 202+ 2050 D5           	PUSH		DE
+ 203+ 2051 EB           	EX DE,HL
+ 204+ 2052              	DUP 8
+ 205+ 2052 1A          >		LD		A,(DE)
+ 206+ 2053 77          >		LD		(HL),A
+ 207+ 2054 ED 93       >		PIXELDN
+ 208+ 2056 77          >		LD		(HL),A
+ 209+ 2057 ED 93       >		PIXELDN
+ 210+ 2059 13          >		INC		DE
+ 205+ 205A 1A          >		LD		A,(DE)
+ 206+ 205B 77          >		LD		(HL),A
+ 207+ 205C ED 93       >		PIXELDN
+ 208+ 205E 77          >		LD		(HL),A
+ 209+ 205F ED 93       >		PIXELDN
+ 210+ 2061 13          >		INC		DE
+ 205+ 2062 1A          >		LD		A,(DE)
+ 206+ 2063 77          >		LD		(HL),A
+ 207+ 2064 ED 93       >		PIXELDN
+ 208+ 2066 77          >		LD		(HL),A
+ 209+ 2067 ED 93       >		PIXELDN
+ 210+ 2069 13          >		INC		DE
+ 205+ 206A 1A          >		LD		A,(DE)
+ 206+ 206B 77          >		LD		(HL),A
+ 207+ 206C ED 93       >		PIXELDN
+ 208+ 206E 77          >		LD		(HL),A
+ 209+ 206F ED 93       >		PIXELDN
+ 210+ 2071 13          >		INC		DE
+ 205+ 2072 1A          >		LD		A,(DE)
+ 206+ 2073 77          >		LD		(HL),A
+ 207+ 2074 ED 93       >		PIXELDN
+ 208+ 2076 77          >		LD		(HL),A
+ 209+ 2077 ED 93       >		PIXELDN
+ 210+ 2079 13          >		INC		DE
+ 205+ 207A 1A          >		LD		A,(DE)
+ 206+ 207B 77          >		LD		(HL),A
+ 207+ 207C ED 93       >		PIXELDN
+ 208+ 207E 77          >		LD		(HL),A
+ 209+ 207F ED 93       >		PIXELDN
+ 210+ 2081 13          >		INC		DE
+ 205+ 2082 1A          >		LD		A,(DE)
+ 206+ 2083 77          >		LD		(HL),A
+ 207+ 2084 ED 93       >		PIXELDN
+ 208+ 2086 77          >		LD		(HL),A
+ 209+ 2087 ED 93       >		PIXELDN
+ 210+ 2089 13          >		INC		DE
+ 205+ 208A 1A          >		LD		A,(DE)
+ 206+ 208B 77          >		LD		(HL),A
+ 207+ 208C ED 93       >		PIXELDN
+ 208+ 208E 77          >		LD		(HL),A
+ 209+ 208F ED 93       >		PIXELDN
+ 210+ 2091 13          >		INC		DE
+ 211+ 2092              	EDUP
+ 212+ 2092 EB           	EX DE,HL
+ 213+ 2093
+ 214+ 2093 D1           	POP			DE
+ 215+ 2094 6B           	LD			L,E
+ 216+ 2095 7A           	LD			A,D
+ 217+ 2096 0F          > RRCA
+ 217+ 2097 0F          > RRCA
+ 217+ 2098 0F          > RRCA
+ 218+ 2099 E6 03        	AND			%00000011
+ 219+ 209B F6 58        	OR			%01011000
+ 220+ 209D 67           	LD			H,A
+ 221+ 209E 71           	LD			(HL),C
+ 222+ 209F ED 34 20 00  	ADD			HL,0x0020
+ 223+ 20A3 71           	LD			(HL),C
+ 224+ 20A4 1C           	INC			E
+ 225+ 20A5 C9           	RET
+ 226+ 20A6
+ 227+ 20A6              prntString:
+ 228+ 20A6 4E           	LD			C,(HL)
+ 229+ 20A7 23           	INC			HL
+ 230+ 20A8              .prntString
+ 231+ 20A8 E5           	PUSH		HL
+ 232+ 20A9 7E           	LD			A,(HL)
+ 233+ 20AA CD 2B 20     	CALL		prntChar
+ 234+ 20AD E1           	POP			HL
+ 235+ 20AE 23           	INC			HL
+ 236+ 20AF 10 F7        	DJNZ		.prntString
+ 237+ 20B1 C9           	RET
+ 238+ 20B2
+ 239+ 20B2              prntStringDblHgt:
+ 240+ 20B2 4E           	LD			C,(HL)
+ 241+ 20B3 23           	INC			HL
+ 242+ 20B4              .prntStringDblHgt
+ 243+ 20B4 E5           	PUSH		HL
+ 244+ 20B5 7E           	LD			A,(HL)
+ 245+ 20B6 CD 4D 20     	CALL		prntCharDblHgt
+ 246+ 20B9 E1           	POP			HL
+ 247+ 20BA 23           	INC			HL
+ 248+ 20BB 10 F7        	DJNZ		.prntStringDblHgt
+ 249+ 20BD C9           	RET
+ 250+ 20BE
+ 251+ 20BE              	IFNDEF NO_FRAMES
+ 252+ 20BE ~            ; requires a frames counter intremented every interrupt
+ 253+ 20BE ~            ;
+ 254+ 20BE ~            waitForFrames
+ 255+ 20BE ~            		PUSH	BC
+ 256+ 20BE ~            		PUSH	HL
+ 257+ 20BE ~            		LD		B,A
+ 258+ 20BE ~            		LD		HL,frames
+ 259+ 20BE ~            .waitNxtInt
+ 260+ 20BE ~            		LD		C,(HL)
+ 261+ 20BE ~            .waitForFrame
+ 262+ 20BE ~            		LD		A,(HL)
+ 263+ 20BE ~            		SUB		C
+ 264+ 20BE ~            		CP		5
+ 265+ 20BE ~            		JR		C,.waitForFrame
+ 266+ 20BE ~            		DJNZ	.waitNxtInt
+ 267+ 20BE ~            		POP		HL
+ 268+ 20BE ~            		POP		BC
+ 269+ 20BE ~            		RET
+ 270+ 20BE              	ENDIF
+ 271+ 20BE
+ 272+ 20BE              	IFNDEF NO_FRAMES
+ 273+ 20BE ~            prntFadingString
+ 274+ 20BE ~            		PUSH	BC
+ 275+ 20BE ~            		PUSH	DE
+ 276+ 20BE ~            		CALL	prntStringDblHgt
+ 277+ 20BE ~            		POP		DE
+ 278+ 20BE ~            		POP		BC
+ 279+ 20BE ~            		LD		A,3
+ 280+ 20BE ~            		CALL	waitForFrames
+ 281+ 20BE ~
+ 282+ 20BE ~            		LD		A,D
+ 283+ 20BE ~            		.3		RRCA
+ 284+ 20BE ~            		AND		%00000011
+ 285+ 20BE ~            		OR		%01011000
+ 286+ 20BE ~            		LD		D,A
+ 287+ 20BE ~
+ 288+ 20BE ~            		LD		HL,fadeAttrSequence
+ 289+ 20BE ~            		LD		C,5
+ 290+ 20BE ~            .nxtInSequence
+ 291+ 20BE ~            		PUSH	BC
+ 292+ 20BE ~            		PUSH	DE
+ 293+ 20BE ~            		LD		A,3
+ 294+ 20BE ~            		CALL	waitForFrames
+ 295+ 20BE ~            .nxtByte
+ 296+ 20BE ~            		LD		A,(HL)
  297+ 20BE ~            		LD		(DE),A
- 298+ 20BE ~            		ADD		DE,-0x001F
- 299+ 20BE ~            		DJNZ	.nxtByte
- 300+ 20BE ~            		POP		DE
- 301+ 20BE ~            		POP		BC
- 302+ 20BE ~            		INC		HL
- 303+ 20BE ~            		DEC		C
- 304+ 20BE ~            		JR		NZ,.nxtInSequence
- 305+ 20BE ~            		RET
- 306+ 20BE ~
- 307+ 20BE ~            fadeAttrSequence
- 308+ 20BE ~            		DEFB BRIGHT | BLACK_PAPER | WHITE_INK
- 309+ 20BE ~            		DEFB BLACK_PAPER | WHITE_INK
- 310+ 20BE ~            		DEFB BLACK_PAPER | CYAN_INK
- 311+ 20BE ~            		DEFB BLACK_PAPER | BLUE_INK
- 312+ 20BE ~            		DEFB BLACK_PAPER | BLACK_INK
- 313+ 20BE              	ENDIF
- 314+ 20BE
- 315+ 20BE              	MACRO	INC_RAW fn, sb, n
- 316+ 20BE ~            COUNT = n
- 317+ 20BE ~            BNK_OFFSET = 0x00
- 318+ 20BE ~            ADDR_OFFSET = 0x0000
- 319+ 20BE ~            		WHILE COUNT > 0
- 320+ 20BE ~            			MMU 6, sb + BNK_OFFSET, 0xC000
- 321+ 20BE ~            			IF COUNT > 1
- 322+ 20BE ~            				INCBIN fn, ADDR_OFFSET, 0x2000
- 323+ 20BE ~            			ELSE
- 324+ 20BE ~            				INCBIN fn, ADDR_OFFSET
- 325+ 20BE ~            			ENDIF
- 326+ 20BE ~            ADDR_OFFSET = ADDR_OFFSET + 0x2000
- 327+ 20BE ~            BNK_OFFSET = BNK_OFFSET + 0x01
- 328+ 20BE ~            COUNT = COUNT - 0x01
- 329+ 20BE ~            		ENDW
- 330+ 20BE              	ENDM
+ 298+ 20BE ~            		ADD		DE,0x0020
+ 299+ 20BE ~            		LD		(DE),A
+ 300+ 20BE ~            		ADD		DE,-0x001F
+ 301+ 20BE ~            		DJNZ	.nxtByte
+ 302+ 20BE ~            		POP		DE
+ 303+ 20BE ~            		POP		BC
+ 304+ 20BE ~            		INC		HL
+ 305+ 20BE ~            		DEC		C
+ 306+ 20BE ~            		JR		NZ,.nxtInSequence
+ 307+ 20BE ~            		RET
+ 308+ 20BE ~
+ 309+ 20BE ~            fadeAttrSequence
+ 310+ 20BE ~            		DEFB BRIGHT | BLACK_PAPER | WHITE_INK
+ 311+ 20BE ~            		DEFB BLACK_PAPER | WHITE_INK
+ 312+ 20BE ~            		DEFB BLACK_PAPER | CYAN_INK
+ 313+ 20BE ~            		DEFB BLACK_PAPER | BLUE_INK
+ 314+ 20BE ~            		DEFB BLACK_PAPER | BLACK_INK
+ 315+ 20BE              	ENDIF
+ 316+ 20BE
+ 317+ 20BE              	MACRO	INC_RAW fn, sb, n
+ 318+ 20BE ~            COUNT = n
+ 319+ 20BE ~            BNK_OFFSET = 0x00
+ 320+ 20BE ~            ADDR_OFFSET = 0x0000
+ 321+ 20BE ~            		WHILE COUNT > 0
+ 322+ 20BE ~            			MMU 6, sb + BNK_OFFSET, 0xC000
+ 323+ 20BE ~            			IF COUNT > 1
+ 324+ 20BE ~            				INCBIN fn, ADDR_OFFSET, 0x2000
+ 325+ 20BE ~            			ELSE
+ 326+ 20BE ~            				INCBIN fn, ADDR_OFFSET
+ 327+ 20BE ~            			ENDIF
+ 328+ 20BE ~            ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 329+ 20BE ~            BNK_OFFSET = BNK_OFFSET + 0x01
+ 330+ 20BE ~            COUNT = COUNT - 0x01
+ 331+ 20BE ~            		ENDW
+ 332+ 20BE              	ENDM
 # file closed: utils/src/utils.asm
   29  20BE
   30  20BE              commandLinePresent:
@@ -7648,6 +7650,7 @@ Value    Label
 0x0002   RED_INK
 0x0001   BLUE_INK
 0x0000   BLACK_INK
+0x0007 X TURBO_CONTROL_NR_07
 0x0058 X iy_MEMBOT
 0x0057 X iy_PFLAG
 0x0052 X iy_SCR_CT

@@ -175,6 +175,7 @@ selectMagicCard
 	RET
 
 waitForEnter
+	CALL 	clearInputBuffers
 	LD		HL,keyReleasedStatus
 .waitForEnter
 	LD		A,(HL)
@@ -184,6 +185,7 @@ waitForEnter
 	RET
 
 waitForYorN
+	CALL 	clearInputBuffers
 	LD		HL,keyReleasedStatus
 .waitForYorN
 	LD		A,(HL)

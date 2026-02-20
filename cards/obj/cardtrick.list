@@ -8,7 +8,7 @@
    7  0000              	CSPECTMAP	"./cards/obj/cardTrick.map"
    8  0000
    9  0000              CODEBANK		EQU 0x10
-  10  0000
+  10  0000              	;DEFINE		DISABLE_SOUND
   11  0000
   12  0000              	ORG	0x8000
   13  8000
@@ -6906,2132 +6906,2129 @@
   28  8EE5              VERT_STEP			EQU	(30-8)/(CARDS_PER_COLUMN-1)
   29  8EE5              CARD_START_X		EQU	16 - ((HORIZ_STEP*CARDS_PER_ROW)/2)
   30  8EE5
-  31  8EE5              entryPoint
-  32  8EE5 CD 02 95     	CALL		initialise
-  33  8EE8 CD CF 92     	CALL		runCardTrick
-  34  8EEB F3           	DI
-  35  8EEC ED 91 50 FF  	NEXTREG		0x50, 0xFF
-  36  8EF0 C7           	RST			RST0
-  37  8EF1
-  38  8EF1              	include		"./utils/src/utils.asm"
+  31  8EE5              	include		"./utils/src/utils.asm"
 # file opened: utils/src/utils.asm
-   1+ 8EF1              ; ***************************************************************************
-   2+ 8EF1              ; * Spectrum 48K standard addresses                                         *
-   3+ 8EF1              ; ***************************************************************************
-   4+ 8EF1
-   5+ 8EF1              GET_CHAR_r3             equ     $0018           ; get current character
-   6+ 8EF1              NEXT_CHAR_r3            equ     $0020           ; get next character
-   7+ 8EF1              BC_SPACES_r3            equ     $0030           ; allocate workspace
-   8+ 8EF1              CLS_r3                  equ     $0d6b           ; CLS (for layer 0)
-   9+ 8EF1              OUT_CODE_r3             equ     $15ef           ; digit output
-  10+ 8EF1              CHAN_OPEN_r3            equ     $1601           ; open channel to stream
-  11+ 8EF1              CALL_JUMP_r3            equ     $162c           ; execute routine at HL
-  12+ 8EF1              MAKE_ROOM               equ     $1655
-  13+ 8EF1              SET_MIN                 equ     $16b0
-  14+ 8EF1              OUT_SP_NO_r3            equ     $192a           ; numeric place output
-  15+ 8EF1              EACH_STMT_r3            equ     $198b           ; search statements
-  16+ 8EF1              RECLAIM_2               equ     $19e8           ; reclaim BC bytes at HL
-  17+ 8EF1              CLASS_01_r3             equ     $1c1f           ; class 01, variable to assign
-  18+ 8EF1              REPORT_2_r3             equ     $1c2e           ; "2 Variable not found"
-  19+ 8EF1              FREE_MEM_r3             equ     $1f1a           ; BASIC workspace memory
-  20+ 8EF1              PR_STRING_r3            equ     $203c           ; print string
-  21+ 8EF1              LOOK_VARS_r3            equ     $28b2           ; find variable
-  22+ 8EF1              STK_STO_S_r3            equ     $2ab2           ; store string on calc stack
-  23+ 8EF1              LET_r3                  equ     $2aff           ; LET
-  24+ 8EF1              ALPHANUM_r3             equ     $2c88           ; test if char is alphanumeric
-  25+ 8EF1              STACK_A_r3              equ     $2d28           ; push A to calculator stack
-  26+ 8EF1              PRINT_FP_r3             equ     $2de3           ; print floating-point number
-  27+ 8EF1              STACK_NUM_r3            equ     $33b4           ; stack floating-point number
-  28+ 8EF1              LDIR_RET_r3             equ     $33c3           ; address of LDIR, RET
-  29+ 8EF1              REPORT_A_r3             equ     $34e7           ; "A Invalid argument"
-  30+ 8EF1              CHAR_SET_r3             equ     $3d00           ; address of charset
-  31+ 8EF1              EXPT_1NUM				equ     $1c82           ; single numeric expression to be evaluated
-  32+ 8EF1              ; ***************************************************************************
-  33+ 8EF1              ; * System variables                                                        *
-  34+ 8EF1              ; ***************************************************************************
-  35+ 8EF1
-  36+ 8EF1              CACHEBK equ     $5b33
-  37+ 8EF1              RETVARS equ     $5b58
-  38+ 8EF1              RAMRST  equ     $5b5d
-  39+ 8EF1              RAMERR  equ     $5b5e
-  40+ 8EF1              KSTATE  equ     $5c00
-  41+ 8EF1              LAST_K  equ     $5c08
-  42+ 8EF1              REPDEL  equ     $5c09
-  43+ 8EF1              REPPER  equ     $5c0a
-  44+ 8EF1              K_DATA  equ     $5c0d
-  45+ 8EF1              TVDATA  equ     $5c0e
-  46+ 8EF1              STRMS   equ     $5c10
-  47+ 8EF1              CHARS   equ     $5c36
-  48+ 8EF1              RASP    equ     $5c38
-  49+ 8EF1              PIP     equ     $5c39
-  50+ 8EF1              ERR_NR  equ     $5c3a
-  51+ 8EF1              FLAGS   equ     $5c3b
-  52+ 8EF1              TV_FLAG equ     $5c3c
-  53+ 8EF1              ERR_SP  equ     $5c3d
-  54+ 8EF1              MODE    equ     $5c41
-  55+ 8EF1              NEWPPC  equ     $5c42
-  56+ 8EF1              PPC     equ     $5c45
-  57+ 8EF1              SUBPPC  equ     $5c47
-  58+ 8EF1              BORDCR  equ     $5c48
-  59+ 8EF1              E_PPC   equ     $5c49
-  60+ 8EF1              VARS    equ     $5c4b
-  61+ 8EF1              DEST    equ     $5c4d
-  62+ 8EF1              CHANS   equ     $5c4f
-  63+ 8EF1              CURCHL  equ     $5c51
-  64+ 8EF1              PROG    equ     $5c53
-  65+ 8EF1              NXTLIN  equ     $5c55
-  66+ 8EF1              DATADD  equ     $5c57
-  67+ 8EF1              E_LINE  equ     $5c59
-  68+ 8EF1              K_CUR   equ     $5c5b
-  69+ 8EF1              CH_ADD  equ     $5c5d
-  70+ 8EF1              X_PTR   equ     $5c5f
-  71+ 8EF1              WORKSP  equ     $5c61
-  72+ 8EF1              STKBOT  equ     $5c63
-  73+ 8EF1              STKEND  equ     $5c65
-  74+ 8EF1              BREG    equ     $5c67
-  75+ 8EF1              MEM     equ     $5c68
-  76+ 8EF1              FLAGS2  equ     $5c6a
-  77+ 8EF1              DF_SZ   equ     $5c6b
-  78+ 8EF1              OLDPPC  equ     $5c6e
-  79+ 8EF1              OSPCC   equ     $5c70
-  80+ 8EF1              FLAGX   equ     $5c71
-  81+ 8EF1              STRLEN  equ     $5c72
-  82+ 8EF1              T_ADDR  equ     $5c74
-  83+ 8EF1              SEED    equ     $5c76
-  84+ 8EF1              FRAMES  equ     $5c78
-  85+ 8EF1              UDG     equ     $5c7b
-  86+ 8EF1              COORDS  equ     $5c7d
-  87+ 8EF1              GMODE   equ     $5c7f
-  88+ 8EF1              PR_CC   equ     $5c80
-  89+ 8EF1              STIMEOUT equ    $5c81
-  90+ 8EF1              ECHO_E  equ     $5c82
-  91+ 8EF1              DF_CC   equ     $5c84
-  92+ 8EF1              DF_CCL  equ     $5c86
-  93+ 8EF1              S_POSN  equ     $5c88
-  94+ 8EF1              SPOSNL  equ     $5c8a
-  95+ 8EF1              SCR_CT  equ     $5c8c
-  96+ 8EF1              ATTR_P  equ     $5c8d
-  97+ 8EF1              MASK_P  equ     $5c8e
-  98+ 8EF1              ATTR_T  equ     $5c8f
-  99+ 8EF1              MASK_T  equ     $5c90
- 100+ 8EF1              P_FLAG  equ     $5c91
- 101+ 8EF1              MEMBOT  equ     $5c92
- 102+ 8EF1              RAMTOP  equ     $5cb2
- 103+ 8EF1              P_RAMT  equ     $5cb4
- 104+ 8EF1
- 105+ 8EF1              ; As offsets from ERR_NR (usually held in IY)
- 106+ 8EF1              ; NOTE: Negative offsets must be used with iy- rather than iy+
- 107+ 8EF1              ;       These are indicated with the naming convention iy_mVARNAME
- 108+ 8EF1
- 109+ 8EF1              iy_mKSTATE      equ     ERR_NR-KSTATE
- 110+ 8EF1              iy_mKSTATE_4    equ     ERR_NR-(KSTATE+4)
- 111+ 8EF1              iy_mREPPER      equ     ERR_NR-REPPER
- 112+ 8EF1              iy_mK_DATA      equ     ERR_NR-K_DATA
- 113+ 8EF1              iy_mPIP         equ     ERR_NR-PIP
- 114+ 8EF1              iy_mRASP        equ     ERR_NR-RASP
- 115+ 8EF1
- 116+ 8EF1              iy_ERR_NR       equ     ERR_NR-ERR_NR
- 117+ 8EF1
- 118+ 8EF1              iy_FLAGS        equ     FLAGS-ERR_NR
- 119+ 8EF1              iy_TVFLAG       equ     TV_FLAG-ERR_NR
- 120+ 8EF1              iy_MODE         equ     MODE-ERR_NR
- 121+ 8EF1              iy_PPC          equ     PPC-ERR_NR
- 122+ 8EF1              iy_SUBPPC       equ     SUBPPC-ERR_NR
- 123+ 8EF1              iy_BORDCR       equ     BORDCR-ERR_NR
- 124+ 8EF1              iy_E_PPC        equ     E_PPC-ERR_NR
- 125+ 8EF1              iy_K_CUR        equ     K_CUR-ERR_NR
- 126+ 8EF1              iy_X_PTR        equ     X_PTR-ERR_NR
- 127+ 8EF1              iy_BREG         equ     BREG-ERR_NR
- 128+ 8EF1              iy_FLAGS2       equ     FLAGS2-ERR_NR
- 129+ 8EF1              iy_DFSZ         equ     DF_SZ-ERR_NR
- 130+ 8EF1              iy_OLDPPC       equ     OLDPPC-ERR_NR
- 131+ 8EF1              iy_OSPCC        equ     OSPCC-ERR_NR
- 132+ 8EF1              iy_FLAGX        equ     FLAGX-ERR_NR
- 133+ 8EF1              iy_STRLEN       equ     STRLEN-ERR_NR
- 134+ 8EF1              iy_FRAMES       equ     FRAMES-ERR_NR
- 135+ 8EF1              iy_PR_CC        equ     PR_CC-ERR_NR
- 136+ 8EF1              iy_S_POSN       equ     S_POSN-ERR_NR
- 137+ 8EF1              iy_SPOSNL       equ     SPOSNL-ERR_NR
- 138+ 8EF1              iy_SCR_CT       equ     SCR_CT-ERR_NR
- 139+ 8EF1              iy_PFLAG        equ     P_FLAG-ERR_NR
- 140+ 8EF1              iy_MEMBOT       equ     MEMBOT-ERR_NR
- 141+ 8EF1
- 142+ 8EF1              BLACK_INK			EQU %00000000
- 143+ 8EF1              BLUE_INK			EQU %00000001
- 144+ 8EF1              RED_INK				EQU %00000010
- 145+ 8EF1              MAGENTA_INK			EQU %00000011
- 146+ 8EF1              GREEN_INK			EQU %00000100
- 147+ 8EF1              CYAN_INK 			EQU %00000101
- 148+ 8EF1              YELLOW_INK 			EQU %00000110
- 149+ 8EF1              WHITE_INK 			EQU %00000111
- 150+ 8EF1
- 151+ 8EF1              BLACK_PAPER			EQU BLACK_INK << 3
- 152+ 8EF1              BLUE_PAPER			EQU BLUE_INK << 3
- 153+ 8EF1              RED_PAPER			EQU RED_INK << 3
- 154+ 8EF1              MAGENTA_PAPER		EQU MAGENTA_INK << 3
- 155+ 8EF1              GREEN_PAPER			EQU GREEN_INK << 3
- 156+ 8EF1              CYAN_PAPER			EQU CYAN_INK << 3
- 157+ 8EF1              YELLOW_PAPER		EQU YELLOW_INK << 3
- 158+ 8EF1              WHITE_PAPER			EQU WHITE_INK << 3
- 159+ 8EF1
- 160+ 8EF1              BRIGHT				EQU %01000000
- 161+ 8EF1              FLASH				EQU %10000000
- 162+ 8EF1
- 163+ 8EF1              	MACRO CALL48K address
- 164+ 8EF1 ~                    RST     $18
- 165+ 8EF1 ~                    DEFW	address
- 166+ 8EF1              	ENDM
- 167+ 8EF1
- 168+ 8EF1              printRST16
- 169+ 8EF1 7E           	LD		A,(HL)
- 170+ 8EF2 A7           	AND 	A
- 171+ 8EF3 C8           	RET		Z
- 172+ 8EF4 D7           	RST		0x10
- 173+ 8EF5 23           	INC		HL
- 174+ 8EF6 18 F9        	JR		printRST16
- 175+ 8EF8
- 176+ 8EF8              computeCharAddress
- 177+ 8EF8 6F           	LD			L,A
- 178+ 8EF9 26 00        	LD			H,0
- 179+ 8EFB 29          > ADD HL,HL
- 179+ 8EFC 29          > ADD HL,HL
- 179+ 8EFD 29          > ADD HL,HL
- 180+ 8EFE ED 34 00 3C  	ADD			HL,0x3C00
- 181+ 8F02 C9           	RET
- 182+ 8F03
- 183+ 8F03              prntChar
- 184+ 8F03 CD F8 8E     	CALL		computeCharAddress
- 185+ 8F06 D5           	PUSH		DE
- 186+ 8F07 ED A5       > LDWS
- 186+ 8F09 ED A5       > LDWS
- 186+ 8F0B ED A5       > LDWS
- 186+ 8F0D ED A5       > LDWS
- 186+ 8F0F ED A5       > LDWS
- 186+ 8F11 ED A5       > LDWS
- 186+ 8F13 ED A5       > LDWS
- 186+ 8F15 ED A5       > LDWS
- 187+ 8F17 D1           	POP			DE
- 188+ 8F18 6B           	LD			L,E
- 189+ 8F19 7A           	LD			A,D
- 190+ 8F1A 0F          > RRCA
- 190+ 8F1B 0F          > RRCA
- 190+ 8F1C 0F          > RRCA
- 191+ 8F1D E6 03        	AND			%00000011
- 192+ 8F1F F6 58        	OR			%01011000
- 193+ 8F21 67           	LD			H,A
- 194+ 8F22 71           	LD			(HL),C
- 195+ 8F23 1C           	INC			E
- 196+ 8F24 C9           	RET
- 197+ 8F25
- 198+ 8F25              prntCharDblHgt
- 199+ 8F25 CD F8 8E     	CALL		computeCharAddress
- 200+ 8F28 D5           	PUSH		DE
- 201+ 8F29 EB           	EX DE,HL
- 202+ 8F2A              	DUP 8
- 203+ 8F2A 1A          >		LD		A,(DE)
- 204+ 8F2B 77          >		LD		(HL),A
- 205+ 8F2C ED 93       >		PIXELDN
- 206+ 8F2E 77          >		LD		(HL),A
- 207+ 8F2F ED 93       >		PIXELDN
- 208+ 8F31 13          >		INC		DE
- 203+ 8F32 1A          >		LD		A,(DE)
- 204+ 8F33 77          >		LD		(HL),A
- 205+ 8F34 ED 93       >		PIXELDN
- 206+ 8F36 77          >		LD		(HL),A
- 207+ 8F37 ED 93       >		PIXELDN
- 208+ 8F39 13          >		INC		DE
- 203+ 8F3A 1A          >		LD		A,(DE)
- 204+ 8F3B 77          >		LD		(HL),A
- 205+ 8F3C ED 93       >		PIXELDN
- 206+ 8F3E 77          >		LD		(HL),A
- 207+ 8F3F ED 93       >		PIXELDN
- 208+ 8F41 13          >		INC		DE
- 203+ 8F42 1A          >		LD		A,(DE)
- 204+ 8F43 77          >		LD		(HL),A
- 205+ 8F44 ED 93       >		PIXELDN
- 206+ 8F46 77          >		LD		(HL),A
- 207+ 8F47 ED 93       >		PIXELDN
- 208+ 8F49 13          >		INC		DE
- 203+ 8F4A 1A          >		LD		A,(DE)
- 204+ 8F4B 77          >		LD		(HL),A
- 205+ 8F4C ED 93       >		PIXELDN
- 206+ 8F4E 77          >		LD		(HL),A
- 207+ 8F4F ED 93       >		PIXELDN
- 208+ 8F51 13          >		INC		DE
- 203+ 8F52 1A          >		LD		A,(DE)
- 204+ 8F53 77          >		LD		(HL),A
- 205+ 8F54 ED 93       >		PIXELDN
- 206+ 8F56 77          >		LD		(HL),A
- 207+ 8F57 ED 93       >		PIXELDN
- 208+ 8F59 13          >		INC		DE
- 203+ 8F5A 1A          >		LD		A,(DE)
- 204+ 8F5B 77          >		LD		(HL),A
- 205+ 8F5C ED 93       >		PIXELDN
- 206+ 8F5E 77          >		LD		(HL),A
- 207+ 8F5F ED 93       >		PIXELDN
- 208+ 8F61 13          >		INC		DE
- 203+ 8F62 1A          >		LD		A,(DE)
- 204+ 8F63 77          >		LD		(HL),A
- 205+ 8F64 ED 93       >		PIXELDN
- 206+ 8F66 77          >		LD		(HL),A
- 207+ 8F67 ED 93       >		PIXELDN
- 208+ 8F69 13          >		INC		DE
- 209+ 8F6A              	EDUP
- 210+ 8F6A EB           	EX DE,HL
- 211+ 8F6B
- 212+ 8F6B D1           	POP			DE
- 213+ 8F6C 6B           	LD			L,E
- 214+ 8F6D 7A           	LD			A,D
- 215+ 8F6E 0F          > RRCA
- 215+ 8F6F 0F          > RRCA
- 215+ 8F70 0F          > RRCA
- 216+ 8F71 E6 03        	AND			%00000011
- 217+ 8F73 F6 58        	OR			%01011000
- 218+ 8F75 67           	LD			H,A
- 219+ 8F76 71           	LD			(HL),C
- 220+ 8F77 ED 34 20 00  	ADD			HL,0x0020
- 221+ 8F7B 71           	LD			(HL),C
- 222+ 8F7C 1C           	INC			E
- 223+ 8F7D C9           	RET
- 224+ 8F7E
- 225+ 8F7E              prntString:
- 226+ 8F7E 4E           	LD			C,(HL)
- 227+ 8F7F 23           	INC			HL
- 228+ 8F80              .prntString
- 229+ 8F80 E5           	PUSH		HL
- 230+ 8F81 7E           	LD			A,(HL)
- 231+ 8F82 CD 03 8F     	CALL		prntChar
- 232+ 8F85 E1           	POP			HL
- 233+ 8F86 23           	INC			HL
- 234+ 8F87 10 F7        	DJNZ		.prntString
- 235+ 8F89 C9           	RET
- 236+ 8F8A
- 237+ 8F8A              prntStringDblHgt:
- 238+ 8F8A 4E           	LD			C,(HL)
- 239+ 8F8B 23           	INC			HL
- 240+ 8F8C              .prntStringDblHgt
- 241+ 8F8C E5           	PUSH		HL
- 242+ 8F8D 7E           	LD			A,(HL)
- 243+ 8F8E CD 25 8F     	CALL		prntCharDblHgt
- 244+ 8F91 E1           	POP			HL
- 245+ 8F92 23           	INC			HL
- 246+ 8F93 10 F7        	DJNZ		.prntStringDblHgt
- 247+ 8F95 C9           	RET
- 248+ 8F96
- 249+ 8F96              	IFNDEF NO_FRAMES
- 250+ 8F96              ; requires a frames counter intremented every interrupt
- 251+ 8F96              ;
- 252+ 8F96              waitForFrames
- 253+ 8F96 C5           		PUSH	BC
- 254+ 8F97 E5           		PUSH	HL
- 255+ 8F98 47           		LD		B,A
- 256+ 8F99 21 4C 00     		LD		HL,frames
- 257+ 8F9C              .waitNxtInt
- 258+ 8F9C 4E           		LD		C,(HL)
- 259+ 8F9D              .waitForFrame
- 260+ 8F9D 7E           		LD		A,(HL)
- 261+ 8F9E 91           		SUB		C
- 262+ 8F9F FE 05        		CP		5
- 263+ 8FA1 38 FA        		JR		C,.waitForFrame
- 264+ 8FA3 10 F7        		DJNZ	.waitNxtInt
- 265+ 8FA5 E1           		POP		HL
- 266+ 8FA6 C1           		POP		BC
- 267+ 8FA7 C9           		RET
- 268+ 8FA8              	ENDIF
- 269+ 8FA8
- 270+ 8FA8              	IFNDEF NO_FRAMES
- 271+ 8FA8              prntFadingString
- 272+ 8FA8 C5           		PUSH	BC
- 273+ 8FA9 D5           		PUSH	DE
- 274+ 8FAA CD 8A 8F     		CALL	prntStringDblHgt
- 275+ 8FAD D1           		POP		DE
- 276+ 8FAE C1           		POP		BC
- 277+ 8FAF 3E 03        		LD		A,3
- 278+ 8FB1 CD 96 8F     		CALL	waitForFrames
- 279+ 8FB4
- 280+ 8FB4 7A           		LD		A,D
- 281+ 8FB5 0F          > RRCA
- 281+ 8FB6 0F          > RRCA
- 281+ 8FB7 0F          > RRCA
- 282+ 8FB8 E6 03        		AND		%00000011
- 283+ 8FBA F6 58        		OR		%01011000
- 284+ 8FBC 57           		LD		D,A
- 285+ 8FBD
- 286+ 8FBD 21 DD 8F     		LD		HL,fadeAttrSequence
- 287+ 8FC0 0E 05        		LD		C,5
- 288+ 8FC2              .nxtInSequence
- 289+ 8FC2 C5           		PUSH	BC
- 290+ 8FC3 D5           		PUSH	DE
- 291+ 8FC4 3E 03        		LD		A,3
- 292+ 8FC6 CD 96 8F     		CALL	waitForFrames
- 293+ 8FC9              .nxtByte
- 294+ 8FC9 7E           		LD		A,(HL)
- 295+ 8FCA 12           		LD		(DE),A
- 296+ 8FCB ED 35 20 00  		ADD		DE,0x0020
- 297+ 8FCF 12           		LD		(DE),A
- 298+ 8FD0 ED 35 E1 FF  		ADD		DE,-0x001F
- 299+ 8FD4 10 F3        		DJNZ	.nxtByte
- 300+ 8FD6 D1           		POP		DE
- 301+ 8FD7 C1           		POP		BC
- 302+ 8FD8 23           		INC		HL
- 303+ 8FD9 0D           		DEC		C
- 304+ 8FDA 20 E6        		JR		NZ,.nxtInSequence
- 305+ 8FDC C9           		RET
- 306+ 8FDD
- 307+ 8FDD              fadeAttrSequence
- 308+ 8FDD 47           		DEFB BRIGHT | BLACK_PAPER | WHITE_INK
- 309+ 8FDE 07           		DEFB BLACK_PAPER | WHITE_INK
- 310+ 8FDF 05           		DEFB BLACK_PAPER | CYAN_INK
- 311+ 8FE0 01           		DEFB BLACK_PAPER | BLUE_INK
- 312+ 8FE1 00           		DEFB BLACK_PAPER | BLACK_INK
- 313+ 8FE2              	ENDIF
- 314+ 8FE2
- 315+ 8FE2              	MACRO	INC_RAW fn, sb, n
- 316+ 8FE2 ~            COUNT = n
- 317+ 8FE2 ~            BNK_OFFSET = 0x00
- 318+ 8FE2 ~            ADDR_OFFSET = 0x0000
- 319+ 8FE2 ~            		WHILE COUNT > 0
- 320+ 8FE2 ~            			MMU 6, sb + BNK_OFFSET, 0xC000
- 321+ 8FE2 ~            			IF COUNT > 1
- 322+ 8FE2 ~            				INCBIN fn, ADDR_OFFSET, 0x2000
- 323+ 8FE2 ~            			ELSE
- 324+ 8FE2 ~            				INCBIN fn, ADDR_OFFSET
- 325+ 8FE2 ~            			ENDIF
- 326+ 8FE2 ~            ADDR_OFFSET = ADDR_OFFSET + 0x2000
- 327+ 8FE2 ~            BNK_OFFSET = BNK_OFFSET + 0x01
- 328+ 8FE2 ~            COUNT = COUNT - 0x01
- 329+ 8FE2 ~            		ENDW
- 330+ 8FE2              	ENDM
+   1+ 8EE5              ; ***************************************************************************
+   2+ 8EE5              ; * Spectrum 48K standard addresses                                         *
+   3+ 8EE5              ; ***************************************************************************
+   4+ 8EE5
+   5+ 8EE5              GET_CHAR_r3             equ     $0018           ; get current character
+   6+ 8EE5              NEXT_CHAR_r3            equ     $0020           ; get next character
+   7+ 8EE5              BC_SPACES_r3            equ     $0030           ; allocate workspace
+   8+ 8EE5              CLS_r3                  equ     $0d6b           ; CLS (for layer 0)
+   9+ 8EE5              OUT_CODE_r3             equ     $15ef           ; digit output
+  10+ 8EE5              CHAN_OPEN_r3            equ     $1601           ; open channel to stream
+  11+ 8EE5              CALL_JUMP_r3            equ     $162c           ; execute routine at HL
+  12+ 8EE5              MAKE_ROOM               equ     $1655
+  13+ 8EE5              SET_MIN                 equ     $16b0
+  14+ 8EE5              OUT_SP_NO_r3            equ     $192a           ; numeric place output
+  15+ 8EE5              EACH_STMT_r3            equ     $198b           ; search statements
+  16+ 8EE5              RECLAIM_2               equ     $19e8           ; reclaim BC bytes at HL
+  17+ 8EE5              CLASS_01_r3             equ     $1c1f           ; class 01, variable to assign
+  18+ 8EE5              REPORT_2_r3             equ     $1c2e           ; "2 Variable not found"
+  19+ 8EE5              FREE_MEM_r3             equ     $1f1a           ; BASIC workspace memory
+  20+ 8EE5              PR_STRING_r3            equ     $203c           ; print string
+  21+ 8EE5              LOOK_VARS_r3            equ     $28b2           ; find variable
+  22+ 8EE5              STK_STO_S_r3            equ     $2ab2           ; store string on calc stack
+  23+ 8EE5              LET_r3                  equ     $2aff           ; LET
+  24+ 8EE5              ALPHANUM_r3             equ     $2c88           ; test if char is alphanumeric
+  25+ 8EE5              STACK_A_r3              equ     $2d28           ; push A to calculator stack
+  26+ 8EE5              PRINT_FP_r3             equ     $2de3           ; print floating-point number
+  27+ 8EE5              STACK_NUM_r3            equ     $33b4           ; stack floating-point number
+  28+ 8EE5              LDIR_RET_r3             equ     $33c3           ; address of LDIR, RET
+  29+ 8EE5              REPORT_A_r3             equ     $34e7           ; "A Invalid argument"
+  30+ 8EE5              CHAR_SET_r3             equ     $3d00           ; address of charset
+  31+ 8EE5              EXPT_1NUM				equ     $1c82           ; single numeric expression to be evaluated
+  32+ 8EE5              ; ***************************************************************************
+  33+ 8EE5              ; * System variables                                                        *
+  34+ 8EE5              ; ***************************************************************************
+  35+ 8EE5
+  36+ 8EE5              CACHEBK equ     $5b33
+  37+ 8EE5              RETVARS equ     $5b58
+  38+ 8EE5              RAMRST  equ     $5b5d
+  39+ 8EE5              RAMERR  equ     $5b5e
+  40+ 8EE5              KSTATE  equ     $5c00
+  41+ 8EE5              LAST_K  equ     $5c08
+  42+ 8EE5              REPDEL  equ     $5c09
+  43+ 8EE5              REPPER  equ     $5c0a
+  44+ 8EE5              K_DATA  equ     $5c0d
+  45+ 8EE5              TVDATA  equ     $5c0e
+  46+ 8EE5              STRMS   equ     $5c10
+  47+ 8EE5              CHARS   equ     $5c36
+  48+ 8EE5              RASP    equ     $5c38
+  49+ 8EE5              PIP     equ     $5c39
+  50+ 8EE5              ERR_NR  equ     $5c3a
+  51+ 8EE5              FLAGS   equ     $5c3b
+  52+ 8EE5              TV_FLAG equ     $5c3c
+  53+ 8EE5              ERR_SP  equ     $5c3d
+  54+ 8EE5              MODE    equ     $5c41
+  55+ 8EE5              NEWPPC  equ     $5c42
+  56+ 8EE5              PPC     equ     $5c45
+  57+ 8EE5              SUBPPC  equ     $5c47
+  58+ 8EE5              BORDCR  equ     $5c48
+  59+ 8EE5              E_PPC   equ     $5c49
+  60+ 8EE5              VARS    equ     $5c4b
+  61+ 8EE5              DEST    equ     $5c4d
+  62+ 8EE5              CHANS   equ     $5c4f
+  63+ 8EE5              CURCHL  equ     $5c51
+  64+ 8EE5              PROG    equ     $5c53
+  65+ 8EE5              NXTLIN  equ     $5c55
+  66+ 8EE5              DATADD  equ     $5c57
+  67+ 8EE5              E_LINE  equ     $5c59
+  68+ 8EE5              K_CUR   equ     $5c5b
+  69+ 8EE5              CH_ADD  equ     $5c5d
+  70+ 8EE5              X_PTR   equ     $5c5f
+  71+ 8EE5              WORKSP  equ     $5c61
+  72+ 8EE5              STKBOT  equ     $5c63
+  73+ 8EE5              STKEND  equ     $5c65
+  74+ 8EE5              BREG    equ     $5c67
+  75+ 8EE5              MEM     equ     $5c68
+  76+ 8EE5              FLAGS2  equ     $5c6a
+  77+ 8EE5              DF_SZ   equ     $5c6b
+  78+ 8EE5              OLDPPC  equ     $5c6e
+  79+ 8EE5              OSPCC   equ     $5c70
+  80+ 8EE5              FLAGX   equ     $5c71
+  81+ 8EE5              STRLEN  equ     $5c72
+  82+ 8EE5              T_ADDR  equ     $5c74
+  83+ 8EE5              SEED    equ     $5c76
+  84+ 8EE5              FRAMES  equ     $5c78
+  85+ 8EE5              UDG     equ     $5c7b
+  86+ 8EE5              COORDS  equ     $5c7d
+  87+ 8EE5              GMODE   equ     $5c7f
+  88+ 8EE5              PR_CC   equ     $5c80
+  89+ 8EE5              STIMEOUT equ    $5c81
+  90+ 8EE5              ECHO_E  equ     $5c82
+  91+ 8EE5              DF_CC   equ     $5c84
+  92+ 8EE5              DF_CCL  equ     $5c86
+  93+ 8EE5              S_POSN  equ     $5c88
+  94+ 8EE5              SPOSNL  equ     $5c8a
+  95+ 8EE5              SCR_CT  equ     $5c8c
+  96+ 8EE5              ATTR_P  equ     $5c8d
+  97+ 8EE5              MASK_P  equ     $5c8e
+  98+ 8EE5              ATTR_T  equ     $5c8f
+  99+ 8EE5              MASK_T  equ     $5c90
+ 100+ 8EE5              P_FLAG  equ     $5c91
+ 101+ 8EE5              MEMBOT  equ     $5c92
+ 102+ 8EE5              RAMTOP  equ     $5cb2
+ 103+ 8EE5              P_RAMT  equ     $5cb4
+ 104+ 8EE5
+ 105+ 8EE5              ; As offsets from ERR_NR (usually held in IY)
+ 106+ 8EE5              ; NOTE: Negative offsets must be used with iy- rather than iy+
+ 107+ 8EE5              ;       These are indicated with the naming convention iy_mVARNAME
+ 108+ 8EE5
+ 109+ 8EE5              iy_mKSTATE      equ     ERR_NR-KSTATE
+ 110+ 8EE5              iy_mKSTATE_4    equ     ERR_NR-(KSTATE+4)
+ 111+ 8EE5              iy_mREPPER      equ     ERR_NR-REPPER
+ 112+ 8EE5              iy_mK_DATA      equ     ERR_NR-K_DATA
+ 113+ 8EE5              iy_mPIP         equ     ERR_NR-PIP
+ 114+ 8EE5              iy_mRASP        equ     ERR_NR-RASP
+ 115+ 8EE5
+ 116+ 8EE5              iy_ERR_NR       equ     ERR_NR-ERR_NR
+ 117+ 8EE5
+ 118+ 8EE5              iy_FLAGS        equ     FLAGS-ERR_NR
+ 119+ 8EE5              iy_TVFLAG       equ     TV_FLAG-ERR_NR
+ 120+ 8EE5              iy_MODE         equ     MODE-ERR_NR
+ 121+ 8EE5              iy_PPC          equ     PPC-ERR_NR
+ 122+ 8EE5              iy_SUBPPC       equ     SUBPPC-ERR_NR
+ 123+ 8EE5              iy_BORDCR       equ     BORDCR-ERR_NR
+ 124+ 8EE5              iy_E_PPC        equ     E_PPC-ERR_NR
+ 125+ 8EE5              iy_K_CUR        equ     K_CUR-ERR_NR
+ 126+ 8EE5              iy_X_PTR        equ     X_PTR-ERR_NR
+ 127+ 8EE5              iy_BREG         equ     BREG-ERR_NR
+ 128+ 8EE5              iy_FLAGS2       equ     FLAGS2-ERR_NR
+ 129+ 8EE5              iy_DFSZ         equ     DF_SZ-ERR_NR
+ 130+ 8EE5              iy_OLDPPC       equ     OLDPPC-ERR_NR
+ 131+ 8EE5              iy_OSPCC        equ     OSPCC-ERR_NR
+ 132+ 8EE5              iy_FLAGX        equ     FLAGX-ERR_NR
+ 133+ 8EE5              iy_STRLEN       equ     STRLEN-ERR_NR
+ 134+ 8EE5              iy_FRAMES       equ     FRAMES-ERR_NR
+ 135+ 8EE5              iy_PR_CC        equ     PR_CC-ERR_NR
+ 136+ 8EE5              iy_S_POSN       equ     S_POSN-ERR_NR
+ 137+ 8EE5              iy_SPOSNL       equ     SPOSNL-ERR_NR
+ 138+ 8EE5              iy_SCR_CT       equ     SCR_CT-ERR_NR
+ 139+ 8EE5              iy_PFLAG        equ     P_FLAG-ERR_NR
+ 140+ 8EE5              iy_MEMBOT       equ     MEMBOT-ERR_NR
+ 141+ 8EE5
+ 142+ 8EE5              TURBO_CONTROL_NR_07             equ $07
+ 143+ 8EE5
+ 144+ 8EE5              BLACK_INK			EQU %00000000
+ 145+ 8EE5              BLUE_INK			EQU %00000001
+ 146+ 8EE5              RED_INK				EQU %00000010
+ 147+ 8EE5              MAGENTA_INK			EQU %00000011
+ 148+ 8EE5              GREEN_INK			EQU %00000100
+ 149+ 8EE5              CYAN_INK 			EQU %00000101
+ 150+ 8EE5              YELLOW_INK 			EQU %00000110
+ 151+ 8EE5              WHITE_INK 			EQU %00000111
+ 152+ 8EE5
+ 153+ 8EE5              BLACK_PAPER			EQU BLACK_INK << 3
+ 154+ 8EE5              BLUE_PAPER			EQU BLUE_INK << 3
+ 155+ 8EE5              RED_PAPER			EQU RED_INK << 3
+ 156+ 8EE5              MAGENTA_PAPER		EQU MAGENTA_INK << 3
+ 157+ 8EE5              GREEN_PAPER			EQU GREEN_INK << 3
+ 158+ 8EE5              CYAN_PAPER			EQU CYAN_INK << 3
+ 159+ 8EE5              YELLOW_PAPER		EQU YELLOW_INK << 3
+ 160+ 8EE5              WHITE_PAPER			EQU WHITE_INK << 3
+ 161+ 8EE5
+ 162+ 8EE5              BRIGHT				EQU %01000000
+ 163+ 8EE5              FLASH				EQU %10000000
+ 164+ 8EE5
+ 165+ 8EE5              	MACRO CALL48K address
+ 166+ 8EE5 ~                    RST     $18
+ 167+ 8EE5 ~                    DEFW	address
+ 168+ 8EE5              	ENDM
+ 169+ 8EE5
+ 170+ 8EE5              printRST16
+ 171+ 8EE5 7E           	LD		A,(HL)
+ 172+ 8EE6 A7           	AND 	A
+ 173+ 8EE7 C8           	RET		Z
+ 174+ 8EE8 D7           	RST		0x10
+ 175+ 8EE9 23           	INC		HL
+ 176+ 8EEA 18 F9        	JR		printRST16
+ 177+ 8EEC
+ 178+ 8EEC              computeCharAddress
+ 179+ 8EEC 6F           	LD			L,A
+ 180+ 8EED 26 00        	LD			H,0
+ 181+ 8EEF 29          > ADD HL,HL
+ 181+ 8EF0 29          > ADD HL,HL
+ 181+ 8EF1 29          > ADD HL,HL
+ 182+ 8EF2 ED 34 00 3C  	ADD			HL,0x3C00
+ 183+ 8EF6 C9           	RET
+ 184+ 8EF7
+ 185+ 8EF7              prntChar
+ 186+ 8EF7 CD EC 8E     	CALL		computeCharAddress
+ 187+ 8EFA D5           	PUSH		DE
+ 188+ 8EFB ED A5       > LDWS
+ 188+ 8EFD ED A5       > LDWS
+ 188+ 8EFF ED A5       > LDWS
+ 188+ 8F01 ED A5       > LDWS
+ 188+ 8F03 ED A5       > LDWS
+ 188+ 8F05 ED A5       > LDWS
+ 188+ 8F07 ED A5       > LDWS
+ 188+ 8F09 ED A5       > LDWS
+ 189+ 8F0B D1           	POP			DE
+ 190+ 8F0C 6B           	LD			L,E
+ 191+ 8F0D 7A           	LD			A,D
+ 192+ 8F0E 0F          > RRCA
+ 192+ 8F0F 0F          > RRCA
+ 192+ 8F10 0F          > RRCA
+ 193+ 8F11 E6 03        	AND			%00000011
+ 194+ 8F13 F6 58        	OR			%01011000
+ 195+ 8F15 67           	LD			H,A
+ 196+ 8F16 71           	LD			(HL),C
+ 197+ 8F17 1C           	INC			E
+ 198+ 8F18 C9           	RET
+ 199+ 8F19
+ 200+ 8F19              prntCharDblHgt
+ 201+ 8F19 CD EC 8E     	CALL		computeCharAddress
+ 202+ 8F1C D5           	PUSH		DE
+ 203+ 8F1D EB           	EX DE,HL
+ 204+ 8F1E              	DUP 8
+ 205+ 8F1E 1A          >		LD		A,(DE)
+ 206+ 8F1F 77          >		LD		(HL),A
+ 207+ 8F20 ED 93       >		PIXELDN
+ 208+ 8F22 77          >		LD		(HL),A
+ 209+ 8F23 ED 93       >		PIXELDN
+ 210+ 8F25 13          >		INC		DE
+ 205+ 8F26 1A          >		LD		A,(DE)
+ 206+ 8F27 77          >		LD		(HL),A
+ 207+ 8F28 ED 93       >		PIXELDN
+ 208+ 8F2A 77          >		LD		(HL),A
+ 209+ 8F2B ED 93       >		PIXELDN
+ 210+ 8F2D 13          >		INC		DE
+ 205+ 8F2E 1A          >		LD		A,(DE)
+ 206+ 8F2F 77          >		LD		(HL),A
+ 207+ 8F30 ED 93       >		PIXELDN
+ 208+ 8F32 77          >		LD		(HL),A
+ 209+ 8F33 ED 93       >		PIXELDN
+ 210+ 8F35 13          >		INC		DE
+ 205+ 8F36 1A          >		LD		A,(DE)
+ 206+ 8F37 77          >		LD		(HL),A
+ 207+ 8F38 ED 93       >		PIXELDN
+ 208+ 8F3A 77          >		LD		(HL),A
+ 209+ 8F3B ED 93       >		PIXELDN
+ 210+ 8F3D 13          >		INC		DE
+ 205+ 8F3E 1A          >		LD		A,(DE)
+ 206+ 8F3F 77          >		LD		(HL),A
+ 207+ 8F40 ED 93       >		PIXELDN
+ 208+ 8F42 77          >		LD		(HL),A
+ 209+ 8F43 ED 93       >		PIXELDN
+ 210+ 8F45 13          >		INC		DE
+ 205+ 8F46 1A          >		LD		A,(DE)
+ 206+ 8F47 77          >		LD		(HL),A
+ 207+ 8F48 ED 93       >		PIXELDN
+ 208+ 8F4A 77          >		LD		(HL),A
+ 209+ 8F4B ED 93       >		PIXELDN
+ 210+ 8F4D 13          >		INC		DE
+ 205+ 8F4E 1A          >		LD		A,(DE)
+ 206+ 8F4F 77          >		LD		(HL),A
+ 207+ 8F50 ED 93       >		PIXELDN
+ 208+ 8F52 77          >		LD		(HL),A
+ 209+ 8F53 ED 93       >		PIXELDN
+ 210+ 8F55 13          >		INC		DE
+ 205+ 8F56 1A          >		LD		A,(DE)
+ 206+ 8F57 77          >		LD		(HL),A
+ 207+ 8F58 ED 93       >		PIXELDN
+ 208+ 8F5A 77          >		LD		(HL),A
+ 209+ 8F5B ED 93       >		PIXELDN
+ 210+ 8F5D 13          >		INC		DE
+ 211+ 8F5E              	EDUP
+ 212+ 8F5E EB           	EX DE,HL
+ 213+ 8F5F
+ 214+ 8F5F D1           	POP			DE
+ 215+ 8F60 6B           	LD			L,E
+ 216+ 8F61 7A           	LD			A,D
+ 217+ 8F62 0F          > RRCA
+ 217+ 8F63 0F          > RRCA
+ 217+ 8F64 0F          > RRCA
+ 218+ 8F65 E6 03        	AND			%00000011
+ 219+ 8F67 F6 58        	OR			%01011000
+ 220+ 8F69 67           	LD			H,A
+ 221+ 8F6A 71           	LD			(HL),C
+ 222+ 8F6B ED 34 20 00  	ADD			HL,0x0020
+ 223+ 8F6F 71           	LD			(HL),C
+ 224+ 8F70 1C           	INC			E
+ 225+ 8F71 C9           	RET
+ 226+ 8F72
+ 227+ 8F72              prntString:
+ 228+ 8F72 4E           	LD			C,(HL)
+ 229+ 8F73 23           	INC			HL
+ 230+ 8F74              .prntString
+ 231+ 8F74 E5           	PUSH		HL
+ 232+ 8F75 7E           	LD			A,(HL)
+ 233+ 8F76 CD F7 8E     	CALL		prntChar
+ 234+ 8F79 E1           	POP			HL
+ 235+ 8F7A 23           	INC			HL
+ 236+ 8F7B 10 F7        	DJNZ		.prntString
+ 237+ 8F7D C9           	RET
+ 238+ 8F7E
+ 239+ 8F7E              prntStringDblHgt:
+ 240+ 8F7E 4E           	LD			C,(HL)
+ 241+ 8F7F 23           	INC			HL
+ 242+ 8F80              .prntStringDblHgt
+ 243+ 8F80 E5           	PUSH		HL
+ 244+ 8F81 7E           	LD			A,(HL)
+ 245+ 8F82 CD 19 8F     	CALL		prntCharDblHgt
+ 246+ 8F85 E1           	POP			HL
+ 247+ 8F86 23           	INC			HL
+ 248+ 8F87 10 F7        	DJNZ		.prntStringDblHgt
+ 249+ 8F89 C9           	RET
+ 250+ 8F8A
+ 251+ 8F8A              	IFNDEF NO_FRAMES
+ 252+ 8F8A              ; requires a frames counter intremented every interrupt
+ 253+ 8F8A              ;
+ 254+ 8F8A              waitForFrames
+ 255+ 8F8A C5           		PUSH	BC
+ 256+ 8F8B E5           		PUSH	HL
+ 257+ 8F8C 47           		LD		B,A
+ 258+ 8F8D 21 4C 00     		LD		HL,frames
+ 259+ 8F90              .waitNxtInt
+ 260+ 8F90 4E           		LD		C,(HL)
+ 261+ 8F91              .waitForFrame
+ 262+ 8F91 7E           		LD		A,(HL)
+ 263+ 8F92 91           		SUB		C
+ 264+ 8F93 FE 05        		CP		5
+ 265+ 8F95 38 FA        		JR		C,.waitForFrame
+ 266+ 8F97 10 F7        		DJNZ	.waitNxtInt
+ 267+ 8F99 E1           		POP		HL
+ 268+ 8F9A C1           		POP		BC
+ 269+ 8F9B C9           		RET
+ 270+ 8F9C              	ENDIF
+ 271+ 8F9C
+ 272+ 8F9C              	IFNDEF NO_FRAMES
+ 273+ 8F9C              prntFadingString
+ 274+ 8F9C C5           		PUSH	BC
+ 275+ 8F9D D5           		PUSH	DE
+ 276+ 8F9E CD 7E 8F     		CALL	prntStringDblHgt
+ 277+ 8FA1 D1           		POP		DE
+ 278+ 8FA2 C1           		POP		BC
+ 279+ 8FA3 3E 03        		LD		A,3
+ 280+ 8FA5 CD 8A 8F     		CALL	waitForFrames
+ 281+ 8FA8
+ 282+ 8FA8 7A           		LD		A,D
+ 283+ 8FA9 0F          > RRCA
+ 283+ 8FAA 0F          > RRCA
+ 283+ 8FAB 0F          > RRCA
+ 284+ 8FAC E6 03        		AND		%00000011
+ 285+ 8FAE F6 58        		OR		%01011000
+ 286+ 8FB0 57           		LD		D,A
+ 287+ 8FB1
+ 288+ 8FB1 21 D1 8F     		LD		HL,fadeAttrSequence
+ 289+ 8FB4 0E 05        		LD		C,5
+ 290+ 8FB6              .nxtInSequence
+ 291+ 8FB6 C5           		PUSH	BC
+ 292+ 8FB7 D5           		PUSH	DE
+ 293+ 8FB8 3E 03        		LD		A,3
+ 294+ 8FBA CD 8A 8F     		CALL	waitForFrames
+ 295+ 8FBD              .nxtByte
+ 296+ 8FBD 7E           		LD		A,(HL)
+ 297+ 8FBE 12           		LD		(DE),A
+ 298+ 8FBF ED 35 20 00  		ADD		DE,0x0020
+ 299+ 8FC3 12           		LD		(DE),A
+ 300+ 8FC4 ED 35 E1 FF  		ADD		DE,-0x001F
+ 301+ 8FC8 10 F3        		DJNZ	.nxtByte
+ 302+ 8FCA D1           		POP		DE
+ 303+ 8FCB C1           		POP		BC
+ 304+ 8FCC 23           		INC		HL
+ 305+ 8FCD 0D           		DEC		C
+ 306+ 8FCE 20 E6        		JR		NZ,.nxtInSequence
+ 307+ 8FD0 C9           		RET
+ 308+ 8FD1
+ 309+ 8FD1              fadeAttrSequence
+ 310+ 8FD1 47           		DEFB BRIGHT | BLACK_PAPER | WHITE_INK
+ 311+ 8FD2 07           		DEFB BLACK_PAPER | WHITE_INK
+ 312+ 8FD3 05           		DEFB BLACK_PAPER | CYAN_INK
+ 313+ 8FD4 01           		DEFB BLACK_PAPER | BLUE_INK
+ 314+ 8FD5 00           		DEFB BLACK_PAPER | BLACK_INK
+ 315+ 8FD6              	ENDIF
+ 316+ 8FD6
+ 317+ 8FD6              	MACRO	INC_RAW fn, sb, n
+ 318+ 8FD6 ~            COUNT = n
+ 319+ 8FD6 ~            BNK_OFFSET = 0x00
+ 320+ 8FD6 ~            ADDR_OFFSET = 0x0000
+ 321+ 8FD6 ~            		WHILE COUNT > 0
+ 322+ 8FD6 ~            			MMU 6, sb + BNK_OFFSET, 0xC000
+ 323+ 8FD6 ~            			IF COUNT > 1
+ 324+ 8FD6 ~            				INCBIN fn, ADDR_OFFSET, 0x2000
+ 325+ 8FD6 ~            			ELSE
+ 326+ 8FD6 ~            				INCBIN fn, ADDR_OFFSET
+ 327+ 8FD6 ~            			ENDIF
+ 328+ 8FD6 ~            ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 329+ 8FD6 ~            BNK_OFFSET = BNK_OFFSET + 0x01
+ 330+ 8FD6 ~            COUNT = COUNT - 0x01
+ 331+ 8FD6 ~            		ENDW
+ 332+ 8FD6              	ENDM
 # file closed: utils/src/utils.asm
-  39  8FE2              	include		"./cards/cardtrick/src/animationManagement.asm"
+  32  8FD6
+  33  8FD6              entryPoint
+  34  8FD6 CD 16 95     	CALL		initialise
+  35  8FD9 CD DD 92     	CALL		runCardTrick
+  36  8FDC F3           	DI
+  37  8FDD ED 91 07 03  	NEXTREG		TURBO_CONTROL_NR_07,%00000011
+  38  8FE1 ED 91 50 FF  	NEXTREG		0x50, 0xFF
+  39  8FE5              	IFNDEF	DISABLE_SOUND
+  40  8FE5 CD A2 96     		CALL 		ctc_cleanup
+  41  8FE8 ED 91 56 00  		NEXTREG		0x56, 0x00
+  42  8FEC ED 56        		IM			1
+  43  8FEE              	ENDIF
+  44  8FEE FB           	EI
+  45  8FEF C7           	RST			RST0
+  46  8FF0
+  47  8FF0              	include		"./cards/cardtrick/src/animationManagement.asm"
 # file opened: cards/cardtrick/src/animationManagement.asm
-   1+ 8FE2              clearScreenInsideBorder
-   2+ 8FE2 C5           	PUSH	BC
-   3+ 8FE3 21 21 58     	LD		HL,0x5821
-   4+ 8FE6 06 16        	LD		B, 22
-   5+ 8FE8              .clrNxtAttrLine
-   6+ 8FE8 C5           	PUSH	BC
-   7+ 8FE9 E5           	PUSH	HL
-   8+ 8FEA 54 5D        	LD		DE,HL
-   9+ 8FEC 13           	INC		DE
-  10+ 8FED 36 00        	LD		(HL),0x00
-  11+ 8FEF 01 1D 00     	LD		BC,0x1D
-  12+ 8FF2 ED B0        	LDIR
-  13+ 8FF4 E1           	POP		HL
-  14+ 8FF5 C1           	POP		BC
-  15+ 8FF6 ED 34 20 00  	ADD		HL,0x0020
-  16+ 8FFA 10 EC        	DJNZ	.clrNxtAttrLine
-  17+ 8FFC
-  18+ 8FFC 21 21 40     	LD		HL,0x4021
-  19+ 8FFF 06 B0        	LD		B, 22 * 8
-  20+ 9001              .clrNxtPixelLine
-  21+ 9001 C5           	PUSH	BC
-  22+ 9002 E5           	PUSH	HL
-  23+ 9003 54 5D        	LD		DE,HL
-  24+ 9005 13           	INC		DE
-  25+ 9006 36 00        	LD		(HL),0
-  26+ 9008 01 1D 00     	LD		BC,0x1D
-  27+ 900B ED B0        	LDIR
-  28+ 900D E1           	POP		HL
-  29+ 900E C1           	POP		BC
-  30+ 900F ED 93        	PIXELDN
-  31+ 9011 10 EE        	DJNZ	.clrNxtPixelLine
-  32+ 9013 C1           	POP		BC
-  33+ 9014 C9           	RET
-  34+ 9015
-  35+ 9015              setUpScreen
-  36+ 9015 0E 84        	LD		C,0x84
-  37+ 9017 CD 7E 90     	CALL	colourBorder
-  38+ 901A 11 00 40     	LD		DE,0x4000
-  39+ 901D 21 DC 91     	LD		HL,TRborderGraphic
-  40+ 9020 06 08        	LD		B,0x08
-  41+ 9022              1:
-  42+ 9022 7E           	LD		A,(HL)
-  43+ 9023 12           	LD		(DE),A
-  44+ 9024 ED 35 1F 00  	ADD		DE,0x001F
-  45+ 9028 ED 24        	MIRROR	A
-  46+ 902A 12           	LD		(DE),A
-  47+ 902B ED 35 E1 FF  	ADD		DE,-0x001F
-  48+ 902F 23           	INC		HL
-  49+ 9030 14           	INC		D
-  50+ 9031 10 EF        	DJNZ	1B
-  51+ 9033
-  52+ 9033 06 1E        	LD		B,30
-  53+ 9035 11 01 40     	LD		DE,0x4001
-  54+ 9038 3E FF        	LD		A,%11111111
-  55+ 903A              1:
-  56+ 903A 12           	LD		(DE),A
-  57+ 903B 14           	INC		D
-  58+ 903C 12           	LD		(DE),A
-  59+ 903D 14           	INC		D
-  60+ 903E 12           	LD		(DE),A
-  61+ 903F ED 35 E0 15  	ADD		DE, 0x15E0
-  62+ 9043 12           	LD		(DE),A
-  63+ 9044 15           	DEC		D
-  64+ 9045 12           	LD		(DE),A
-  65+ 9046 15           	DEC		D
-  66+ 9047 12           	LD		(DE),A
-  67+ 9048 ED 35 20 EA  	ADD		DE, -0x15E0
-  68+ 904C 1C           	INC		E
-  69+ 904D 10 EB        	DJNZ	1B
-  70+ 904F
-  71+ 904F 06 B0        	LD		B,22*8
-  72+ 9051 21 20 40     	LD		HL,0x4020
-  73+ 9054              1:
-  74+ 9054 36 E0        	LD		(HL),%11100000
-  75+ 9056 ED 34 1F 00  	ADD		HL,0x001F
-  76+ 905A 36 07        	LD		(HL),%00000111
-  77+ 905C ED 34 E1 FF  	ADD		HL,-0x001F
-  78+ 9060 ED 93        	PIXELDN
-  79+ 9062 10 F0        	DJNZ	1B
-  80+ 9064
-  81+ 9064 11 E0 50     	LD		DE,0x50E0
-  82+ 9067 21 E3 91     	LD		HL,TRborderGraphic+7
-  83+ 906A 06 08        	LD		B,8
-  84+ 906C              1:
-  85+ 906C 7E           	LD		A,(HL)
-  86+ 906D 12           	LD		(DE),A
-  87+ 906E ED 35 1F 00  	ADD		DE,0x001F
-  88+ 9072 ED 24        	MIRROR	A
-  89+ 9074 12           	LD		(DE),A
-  90+ 9075 ED 35 E1 FF  	ADD		DE,-0x001F
-  91+ 9079 2B           	DEC		HL
-  92+ 907A 14           	INC		D
-  93+ 907B 10 EF        	DJNZ	1B
-  94+ 907D C9           	RET
-  95+ 907E
-  96+ 907E              colourBorder
-  97+ 907E 21 00 58     	LD		HL,0x5800
-  98+ 9081 06 20        	LD		B,0x20
-  99+ 9083 11 01 00     	LD		DE,0x0001
- 100+ 9086 CD C2 91     	CALL 	colourBar
- 101+ 9089 ED 34 1F 00  	ADD		HL,0x1F
- 102+ 908D 06 17        	LD		B,23
- 103+ 908F 11 20 00     	LD		DE,0x0020
- 104+ 9092 CD C2 91     	CALL 	colourBar
- 105+ 9095 ED 34 DF FF  	ADD		HL,-0x21
- 106+ 9099 06 1F        	LD		B,31
- 107+ 909B 11 FF FF     	LD		DE,-0x0001
- 108+ 909E CD C2 91     	CALL 	colourBar
- 109+ 90A1 ED 34 E1 FF  	ADD		HL,-0x1F
- 110+ 90A5 06 16        	LD		B,22
- 111+ 90A7 11 E0 FF     	LD		DE,-0x0020
- 112+ 90AA CD C2 91     	CALL 	colourBar
- 113+ 90AD C9           	RET
- 114+ 90AE
- 115+ 90AE              animateBorder
- 116+ 90AE 21 DA 91     	LD		HL,animateBorderTicks
- 117+ 90B1 7E           	LD		A,(HL)
- 118+ 90B2 A7           	AND		A
- 119+ 90B3 C8           	RET		Z
- 120+ 90B4 35           	DEC		(HL)
- 121+ 90B5 C0           	RET		NZ
- 122+ 90B6 23           	INC		HL
- 123+ 90B7 7E           	LD		A,(HL)
- 124+ 90B8 2B           	DEC		HL
- 125+ 90B9 77           	LD		(HL),A
- 126+ 90BA 21 7E 91     	LD		HL,.borderAnimationTable
- 127+ 90BD 3A E2 94     	LD		A,(cardHand+MAGIC_CARD_OFFSET)
- 128+ 90C0 E6 03        	AND		%00000011
- 129+ 90C2 87           	ADD		A
- 130+ 90C3 ED 31        	ADD		HL,A
- 131+ 90C5 5E           	LD		E,(HL)
- 132+ 90C6 23           	INC		HL
- 133+ 90C7 56           	LD		D,(HL)
- 134+ 90C8 EB           	EX		DE,HL
- 135+ 90C9 46           	LD		B,(HL)
- 136+ 90CA 23           	INC		HL
- 137+ 90CB              .animateNxtSection
- 138+ 90CB 5E           	LD		E,(HL)
- 139+ 90CC 23           	INC		HL
- 140+ 90CD 56           	LD		D,(HL)
- 141+ 90CE 23           	INC		HL
- 142+ 90CF C5           	PUSH	BC
- 143+ 90D0 E5           	PUSH	HL
- 144+ 90D1 ED 8A 90 D7  	PUSH	.animateBorderReturn
- 145+ 90D5 EB           	EX		DE,HL
- 146+ 90D6 E9           	JP		(HL)
- 147+ 90D7              .animateBorderReturn
- 148+ 90D7 E1           	POP		HL
- 149+ 90D8 C1           	POP		BC
- 150+ 90D9 10 F0        	DJNZ	.animateNxtSection
- 151+ 90DB C9           	RET
- 152+ 90DC
- 153+ 90DC              .animateRightHalfAntiClockWise
- 154+ 90DC 11 10 58     	LD		DE,0x5810
- 155+ 90DF 21 11 58     	LD		HL,0x5811
- 156+ 90E2 01 0F 00     	LD		BC,0x000F
- 157+ 90E5 1A           	LD		A,(DE)
- 158+ 90E6 F5           	PUSH	AF
- 159+ 90E7 ED B0        	LDIR
- 160+ 90E9 CD 96 91     	CALL	scrollSideUp
- 161+ 90EC 62 6B        	LD		HL,DE
- 162+ 90EE 2B           	DEC		HL
- 163+ 90EF 01 0F 00     	LD		BC,0x000F
- 164+ 90F2 ED B8        	LDDR
- 165+ 90F4 F1           	POP		AF
- 166+ 90F5 12           	LD		(DE),A
- 167+ 90F6 C9           	RET
- 168+ 90F7
- 169+ 90F7              .animateLeftHalfAntiClockWise
- 170+ 90F7 11 EF 5A     	LD		DE,0x580F+23*0x20
- 171+ 90FA 21 EE 5A     	LD		HL,0x580E+23*0x20
- 172+ 90FD 01 0F 00     	LD		BC,0x000F
- 173+ 9100 1A           	LD		A,(DE)
- 174+ 9101 F5           	PUSH	AF
- 175+ 9102 ED B8        	LDDR
- 176+ 9104 CD AD 91     	CALL	scrollSideDown
- 177+ 9107 62 6B        	LD		HL,DE
- 178+ 9109 23           	INC		HL
- 179+ 910A 01 0F 00     	LD		BC,0x000F
- 180+ 910D ED B0        	LDIR
- 181+ 910F F1           	POP		AF
- 182+ 9110 12           	LD		(DE),A
- 183+ 9111 C9           	RET
- 184+ 9112
- 185+ 9112              .animateRightHalfClockWise
- 186+ 9112 11 F0 5A     	LD		DE,0x5810+23*0x20
- 187+ 9115 21 F1 5A     	LD		HL,0x5811+23*0x20
- 188+ 9118 01 0F 00     	LD		BC,0x000F
- 189+ 911B 1A           	LD		A,(DE)
- 190+ 911C F5           	PUSH	AF
- 191+ 911D ED B0        	LDIR
- 192+ 911F CD AD 91     	CALL	scrollSideDown
- 193+ 9122 62 6B        	LD		HL,DE
- 194+ 9124 2B           	DEC		HL
- 195+ 9125 01 0F 00     	LD		BC,0x000F
- 196+ 9128 ED B8        	LDDR
- 197+ 912A F1           	POP		AF
- 198+ 912B 12           	LD		(DE),A
- 199+ 912C C9           	RET
- 200+ 912D
- 201+ 912D              .animateLeftHalfClockWise
- 202+ 912D 11 0F 58     	LD		DE,0x5800+0x0F
- 203+ 9130 21 0E 58     	LD		HL,0x5800+0x0E
- 204+ 9133 01 0F 00     	LD		BC,0x000F
- 205+ 9136 1A           	LD		A,(DE)
- 206+ 9137 F5           	PUSH	AF
- 207+ 9138 ED B8        	LDDR
- 208+ 913A CD 96 91     	CALL	scrollSideUp
- 209+ 913D 23           	INC		HL
- 210+ 913E 01 0F 00     	LD		BC,0x000F
- 211+ 9141 ED B0        	LDIR
- 212+ 9143 F1           	POP		AF
- 213+ 9144 12           	LD		(DE),A
- 214+ 9145 C9           	RET
- 215+ 9146
- 216+ 9146              .animateClockwise
- 217+ 9146 11 1F 58     	LD		DE,0x5800+0x1F
- 218+ 9149 21 1E 58     	LD		HL,0x5800+0x1E
- 219+ 914C 01 1F 00     	LD		BC,0x1F
- 220+ 914F 1A           	LD		A,(DE)
- 221+ 9150 F5           	PUSH	AF
- 222+ 9151 ED B8        	LDDR
- 223+ 9153 CD 96 91     	CALL	scrollSideUp
- 224+ 9156 23           	INC		HL
- 225+ 9157 01 1F 00     	LD		BC,0x001F
- 226+ 915A ED B0        	LDIR
- 227+ 915C CD AD 91     	CALL	scrollSideDown
- 228+ 915F F1           	POP		AF
- 229+ 9160 12           	LD		(DE),A
- 230+ 9161 C9           	RET
- 231+ 9162
- 232+ 9162              .animateAntiClockwise
- 233+ 9162 11 00 58     	LD		DE,0x5800
- 234+ 9165 21 01 58     	LD		HL,0x5801
- 235+ 9168 01 1F 00     	LD		BC,0x1F
- 236+ 916B 1A           	LD		A,(DE)
- 237+ 916C F5           	PUSH	AF
- 238+ 916D ED B0        	LDIR
- 239+ 916F CD 96 91     	CALL	scrollSideUp
- 240+ 9172 2B           	DEC		HL
- 241+ 9173 01 1F 00     	LD		BC,0x001F
- 242+ 9176 ED B8        	LDDR
- 243+ 9178 CD AD 91     	CALL	scrollSideDown
- 244+ 917B F1           	POP		AF
- 245+ 917C 12           	LD		(DE),A
- 246+ 917D C9           	RET
- 247+ 917E
- 248+ 917E              .borderAnimationTable
- 249+ 917E 86 91        	DEFW	.borderAnimation1
- 250+ 9180 89 91        	DEFW	.borderAnimation2
- 251+ 9182 8C 91        	DEFW	.borderAnimation3
- 252+ 9184 91 91        	DEFW	.borderAnimation4
- 253+ 9186
- 254+ 9186              .borderAnimation1
- 255+ 9186 01           	DEFB	0x01
- 256+ 9187 62 91        	DEFW	.animateAntiClockwise
- 257+ 9189              .borderAnimation2
- 258+ 9189 01           	DEFB	0x01
- 259+ 918A 46 91        	DEFW	.animateClockwise
- 260+ 918C              .borderAnimation3
- 261+ 918C 02           	DEFB	0x02
- 262+ 918D F7 90 12 91  	DEFW	.animateLeftHalfAntiClockWise, .animateRightHalfClockWise
- 263+ 9191              .borderAnimation4
- 264+ 9191 02           	DEFB	0x02
- 265+ 9192 2D 91 DC 90  	DEFW	.animateLeftHalfClockWise, .animateRightHalfAntiClockWise
- 266+ 9196
- 267+ 9196              scrollSideUp
- 268+ 9196 62 6B        	LD		HL,DE
- 269+ 9198 ED 34 20 00  	ADD		HL,0x0020
- 270+ 919C 06 17        	LD		B,23
- 271+ 919E              1:
- 272+ 919E 7E           	LD		A,(HL)
- 273+ 919F 12           	LD		(DE),A
- 274+ 91A0 ED 34 20 00  	ADD		HL,0x0020
- 275+ 91A4 ED 35 20 00  	ADD		DE,0x0020
- 276+ 91A8 10 F4        	DJNZ	1B
- 277+ 91AA 62 6B        	LD		HL,DE
- 278+ 91AC C9           	RET
- 279+ 91AD
- 280+ 91AD              scrollSideDown
- 281+ 91AD 62 6B        	LD		HL,DE
- 282+ 91AF ED 34 E0 FF  	ADD		HL,-0x0020
- 283+ 91B3 06 17        	LD		B,23
- 284+ 91B5              1:
- 285+ 91B5 7E           	LD		A,(HL)
- 286+ 91B6 12           	LD		(DE),A
- 287+ 91B7 ED 34 E0 FF  	ADD		HL,-0x0020
- 288+ 91BB ED 35 E0 FF  	ADD		DE,-0x0020
- 289+ 91BF 10 F4        	DJNZ	1B
- 290+ 91C1 C9           	RET
- 291+ 91C2
- 292+ 91C2              colourBar
- 293+ 91C2 79           	LD		A,C
- 294+ 91C3 E6 7F        	AND		%01111111
- 295+ 91C5 77           	LD		(HL), A
- 296+ 91C6 19           	ADD		HL,DE
- 297+ 91C7 CD CD 91     	CALL	setAndAdvanceColour
- 298+ 91CA 10 F6        	DJNZ	colourBar
- 299+ 91CC C9           	RET
- 300+ 91CD
- 301+ 91CD              setAndAdvanceColour
- 302+ 91CD CB 79        	BIT		7,C
- 303+ 91CF C0           	RET		NZ ; don’t advance (static colour)
- 304+ 91D0 0C           	INC		C
- 305+ 91D1 79           	LD		A,C
- 306+ 91D2 E6 7F        	AND		%01111111
- 307+ 91D4 FE 08        	CP		%00001000
- 308+ 91D6 D8           	RET		C
- 309+ 91D7 0E 01        	LD		C,0x01
- 310+ 91D9 C9           	RET
- 311+ 91DA
- 312+ 91DA              animateBorderTicks
- 313+ 91DA 00 02        	DEFB	0x00, 0x02
- 314+ 91DC
- 315+ 91DC              TRborderGraphic
- 316+ 91DC 03 0F 1F 38  	DEFB	0x03, 0x0F, 0x1F, 0x38, 0x70, 0x70, 0xE0, 0xE0
- 316+ 91E0 70 70 E0 E0
- 317+ 91E4
+   1+ 8FF0              clearScreenInsideBorder
+   2+ 8FF0 C5           	PUSH	BC
+   3+ 8FF1 21 21 58     	LD		HL,0x5821
+   4+ 8FF4 06 16        	LD		B, 22
+   5+ 8FF6              .clrNxtAttrLine
+   6+ 8FF6 C5           	PUSH	BC
+   7+ 8FF7 E5           	PUSH	HL
+   8+ 8FF8 54 5D        	LD		DE,HL
+   9+ 8FFA 13           	INC		DE
+  10+ 8FFB 36 00        	LD		(HL),0x00
+  11+ 8FFD 01 1D 00     	LD		BC,0x1D
+  12+ 9000 ED B0        	LDIR
+  13+ 9002 E1           	POP		HL
+  14+ 9003 C1           	POP		BC
+  15+ 9004 ED 34 20 00  	ADD		HL,0x0020
+  16+ 9008 10 EC        	DJNZ	.clrNxtAttrLine
+  17+ 900A
+  18+ 900A 21 21 40     	LD		HL,0x4021
+  19+ 900D 06 B0        	LD		B, 22 * 8
+  20+ 900F              .clrNxtPixelLine
+  21+ 900F C5           	PUSH	BC
+  22+ 9010 E5           	PUSH	HL
+  23+ 9011 54 5D        	LD		DE,HL
+  24+ 9013 13           	INC		DE
+  25+ 9014 36 00        	LD		(HL),0
+  26+ 9016 01 1D 00     	LD		BC,0x1D
+  27+ 9019 ED B0        	LDIR
+  28+ 901B E1           	POP		HL
+  29+ 901C C1           	POP		BC
+  30+ 901D ED 93        	PIXELDN
+  31+ 901F 10 EE        	DJNZ	.clrNxtPixelLine
+  32+ 9021 C1           	POP		BC
+  33+ 9022 C9           	RET
+  34+ 9023
+  35+ 9023              setUpScreen
+  36+ 9023 0E 84        	LD		C,0x84
+  37+ 9025 CD 8C 90     	CALL	colourBorder
+  38+ 9028 11 00 40     	LD		DE,0x4000
+  39+ 902B 21 EA 91     	LD		HL,TRborderGraphic
+  40+ 902E 06 08        	LD		B,0x08
+  41+ 9030              1:
+  42+ 9030 7E           	LD		A,(HL)
+  43+ 9031 12           	LD		(DE),A
+  44+ 9032 ED 35 1F 00  	ADD		DE,0x001F
+  45+ 9036 ED 24        	MIRROR	A
+  46+ 9038 12           	LD		(DE),A
+  47+ 9039 ED 35 E1 FF  	ADD		DE,-0x001F
+  48+ 903D 23           	INC		HL
+  49+ 903E 14           	INC		D
+  50+ 903F 10 EF        	DJNZ	1B
+  51+ 9041
+  52+ 9041 06 1E        	LD		B,30
+  53+ 9043 11 01 40     	LD		DE,0x4001
+  54+ 9046 3E FF        	LD		A,%11111111
+  55+ 9048              1:
+  56+ 9048 12           	LD		(DE),A
+  57+ 9049 14           	INC		D
+  58+ 904A 12           	LD		(DE),A
+  59+ 904B 14           	INC		D
+  60+ 904C 12           	LD		(DE),A
+  61+ 904D ED 35 E0 15  	ADD		DE, 0x15E0
+  62+ 9051 12           	LD		(DE),A
+  63+ 9052 15           	DEC		D
+  64+ 9053 12           	LD		(DE),A
+  65+ 9054 15           	DEC		D
+  66+ 9055 12           	LD		(DE),A
+  67+ 9056 ED 35 20 EA  	ADD		DE, -0x15E0
+  68+ 905A 1C           	INC		E
+  69+ 905B 10 EB        	DJNZ	1B
+  70+ 905D
+  71+ 905D 06 B0        	LD		B,22*8
+  72+ 905F 21 20 40     	LD		HL,0x4020
+  73+ 9062              1:
+  74+ 9062 36 E0        	LD		(HL),%11100000
+  75+ 9064 ED 34 1F 00  	ADD		HL,0x001F
+  76+ 9068 36 07        	LD		(HL),%00000111
+  77+ 906A ED 34 E1 FF  	ADD		HL,-0x001F
+  78+ 906E ED 93        	PIXELDN
+  79+ 9070 10 F0        	DJNZ	1B
+  80+ 9072
+  81+ 9072 11 E0 50     	LD		DE,0x50E0
+  82+ 9075 21 F1 91     	LD		HL,TRborderGraphic+7
+  83+ 9078 06 08        	LD		B,8
+  84+ 907A              1:
+  85+ 907A 7E           	LD		A,(HL)
+  86+ 907B 12           	LD		(DE),A
+  87+ 907C ED 35 1F 00  	ADD		DE,0x001F
+  88+ 9080 ED 24        	MIRROR	A
+  89+ 9082 12           	LD		(DE),A
+  90+ 9083 ED 35 E1 FF  	ADD		DE,-0x001F
+  91+ 9087 2B           	DEC		HL
+  92+ 9088 14           	INC		D
+  93+ 9089 10 EF        	DJNZ	1B
+  94+ 908B C9           	RET
+  95+ 908C
+  96+ 908C              colourBorder
+  97+ 908C 21 00 58     	LD		HL,0x5800
+  98+ 908F 06 20        	LD		B,0x20
+  99+ 9091 11 01 00     	LD		DE,0x0001
+ 100+ 9094 CD D0 91     	CALL 	colourBar
+ 101+ 9097 ED 34 1F 00  	ADD		HL,0x1F
+ 102+ 909B 06 17        	LD		B,23
+ 103+ 909D 11 20 00     	LD		DE,0x0020
+ 104+ 90A0 CD D0 91     	CALL 	colourBar
+ 105+ 90A3 ED 34 DF FF  	ADD		HL,-0x21
+ 106+ 90A7 06 1F        	LD		B,31
+ 107+ 90A9 11 FF FF     	LD		DE,-0x0001
+ 108+ 90AC CD D0 91     	CALL 	colourBar
+ 109+ 90AF ED 34 E1 FF  	ADD		HL,-0x1F
+ 110+ 90B3 06 16        	LD		B,22
+ 111+ 90B5 11 E0 FF     	LD		DE,-0x0020
+ 112+ 90B8 CD D0 91     	CALL 	colourBar
+ 113+ 90BB C9           	RET
+ 114+ 90BC
+ 115+ 90BC              animateBorder
+ 116+ 90BC 21 E8 91     	LD		HL,animateBorderTicks
+ 117+ 90BF 7E           	LD		A,(HL)
+ 118+ 90C0 A7           	AND		A
+ 119+ 90C1 C8           	RET		Z
+ 120+ 90C2 35           	DEC		(HL)
+ 121+ 90C3 C0           	RET		NZ
+ 122+ 90C4 23           	INC		HL
+ 123+ 90C5 7E           	LD		A,(HL)
+ 124+ 90C6 2B           	DEC		HL
+ 125+ 90C7 77           	LD		(HL),A
+ 126+ 90C8 21 8C 91     	LD		HL,.borderAnimationTable
+ 127+ 90CB 3A F6 94     	LD		A,(cardHand+MAGIC_CARD_OFFSET)
+ 128+ 90CE E6 03        	AND		%00000011
+ 129+ 90D0 87           	ADD		A
+ 130+ 90D1 ED 31        	ADD		HL,A
+ 131+ 90D3 5E           	LD		E,(HL)
+ 132+ 90D4 23           	INC		HL
+ 133+ 90D5 56           	LD		D,(HL)
+ 134+ 90D6 EB           	EX		DE,HL
+ 135+ 90D7 46           	LD		B,(HL)
+ 136+ 90D8 23           	INC		HL
+ 137+ 90D9              .animateNxtSection
+ 138+ 90D9 5E           	LD		E,(HL)
+ 139+ 90DA 23           	INC		HL
+ 140+ 90DB 56           	LD		D,(HL)
+ 141+ 90DC 23           	INC		HL
+ 142+ 90DD C5           	PUSH	BC
+ 143+ 90DE E5           	PUSH	HL
+ 144+ 90DF ED 8A 90 E5  	PUSH	.animateBorderReturn
+ 145+ 90E3 EB           	EX		DE,HL
+ 146+ 90E4 E9           	JP		(HL)
+ 147+ 90E5              .animateBorderReturn
+ 148+ 90E5 E1           	POP		HL
+ 149+ 90E6 C1           	POP		BC
+ 150+ 90E7 10 F0        	DJNZ	.animateNxtSection
+ 151+ 90E9 C9           	RET
+ 152+ 90EA
+ 153+ 90EA              .animateRightHalfAntiClockWise
+ 154+ 90EA 11 10 58     	LD		DE,0x5810
+ 155+ 90ED 21 11 58     	LD		HL,0x5811
+ 156+ 90F0 01 0F 00     	LD		BC,0x000F
+ 157+ 90F3 1A           	LD		A,(DE)
+ 158+ 90F4 F5           	PUSH	AF
+ 159+ 90F5 ED B0        	LDIR
+ 160+ 90F7 CD A4 91     	CALL	scrollSideUp
+ 161+ 90FA 62 6B        	LD		HL,DE
+ 162+ 90FC 2B           	DEC		HL
+ 163+ 90FD 01 0F 00     	LD		BC,0x000F
+ 164+ 9100 ED B8        	LDDR
+ 165+ 9102 F1           	POP		AF
+ 166+ 9103 12           	LD		(DE),A
+ 167+ 9104 C9           	RET
+ 168+ 9105
+ 169+ 9105              .animateLeftHalfAntiClockWise
+ 170+ 9105 11 EF 5A     	LD		DE,0x580F+23*0x20
+ 171+ 9108 21 EE 5A     	LD		HL,0x580E+23*0x20
+ 172+ 910B 01 0F 00     	LD		BC,0x000F
+ 173+ 910E 1A           	LD		A,(DE)
+ 174+ 910F F5           	PUSH	AF
+ 175+ 9110 ED B8        	LDDR
+ 176+ 9112 CD BB 91     	CALL	scrollSideDown
+ 177+ 9115 62 6B        	LD		HL,DE
+ 178+ 9117 23           	INC		HL
+ 179+ 9118 01 0F 00     	LD		BC,0x000F
+ 180+ 911B ED B0        	LDIR
+ 181+ 911D F1           	POP		AF
+ 182+ 911E 12           	LD		(DE),A
+ 183+ 911F C9           	RET
+ 184+ 9120
+ 185+ 9120              .animateRightHalfClockWise
+ 186+ 9120 11 F0 5A     	LD		DE,0x5810+23*0x20
+ 187+ 9123 21 F1 5A     	LD		HL,0x5811+23*0x20
+ 188+ 9126 01 0F 00     	LD		BC,0x000F
+ 189+ 9129 1A           	LD		A,(DE)
+ 190+ 912A F5           	PUSH	AF
+ 191+ 912B ED B0        	LDIR
+ 192+ 912D CD BB 91     	CALL	scrollSideDown
+ 193+ 9130 62 6B        	LD		HL,DE
+ 194+ 9132 2B           	DEC		HL
+ 195+ 9133 01 0F 00     	LD		BC,0x000F
+ 196+ 9136 ED B8        	LDDR
+ 197+ 9138 F1           	POP		AF
+ 198+ 9139 12           	LD		(DE),A
+ 199+ 913A C9           	RET
+ 200+ 913B
+ 201+ 913B              .animateLeftHalfClockWise
+ 202+ 913B 11 0F 58     	LD		DE,0x5800+0x0F
+ 203+ 913E 21 0E 58     	LD		HL,0x5800+0x0E
+ 204+ 9141 01 0F 00     	LD		BC,0x000F
+ 205+ 9144 1A           	LD		A,(DE)
+ 206+ 9145 F5           	PUSH	AF
+ 207+ 9146 ED B8        	LDDR
+ 208+ 9148 CD A4 91     	CALL	scrollSideUp
+ 209+ 914B 23           	INC		HL
+ 210+ 914C 01 0F 00     	LD		BC,0x000F
+ 211+ 914F ED B0        	LDIR
+ 212+ 9151 F1           	POP		AF
+ 213+ 9152 12           	LD		(DE),A
+ 214+ 9153 C9           	RET
+ 215+ 9154
+ 216+ 9154              .animateClockwise
+ 217+ 9154 11 1F 58     	LD		DE,0x5800+0x1F
+ 218+ 9157 21 1E 58     	LD		HL,0x5800+0x1E
+ 219+ 915A 01 1F 00     	LD		BC,0x1F
+ 220+ 915D 1A           	LD		A,(DE)
+ 221+ 915E F5           	PUSH	AF
+ 222+ 915F ED B8        	LDDR
+ 223+ 9161 CD A4 91     	CALL	scrollSideUp
+ 224+ 9164 23           	INC		HL
+ 225+ 9165 01 1F 00     	LD		BC,0x001F
+ 226+ 9168 ED B0        	LDIR
+ 227+ 916A CD BB 91     	CALL	scrollSideDown
+ 228+ 916D F1           	POP		AF
+ 229+ 916E 12           	LD		(DE),A
+ 230+ 916F C9           	RET
+ 231+ 9170
+ 232+ 9170              .animateAntiClockwise
+ 233+ 9170 11 00 58     	LD		DE,0x5800
+ 234+ 9173 21 01 58     	LD		HL,0x5801
+ 235+ 9176 01 1F 00     	LD		BC,0x1F
+ 236+ 9179 1A           	LD		A,(DE)
+ 237+ 917A F5           	PUSH	AF
+ 238+ 917B ED B0        	LDIR
+ 239+ 917D CD A4 91     	CALL	scrollSideUp
+ 240+ 9180 2B           	DEC		HL
+ 241+ 9181 01 1F 00     	LD		BC,0x001F
+ 242+ 9184 ED B8        	LDDR
+ 243+ 9186 CD BB 91     	CALL	scrollSideDown
+ 244+ 9189 F1           	POP		AF
+ 245+ 918A 12           	LD		(DE),A
+ 246+ 918B C9           	RET
+ 247+ 918C
+ 248+ 918C              .borderAnimationTable
+ 249+ 918C 94 91        	DEFW	.borderAnimation1
+ 250+ 918E 97 91        	DEFW	.borderAnimation2
+ 251+ 9190 9A 91        	DEFW	.borderAnimation3
+ 252+ 9192 9F 91        	DEFW	.borderAnimation4
+ 253+ 9194
+ 254+ 9194              .borderAnimation1
+ 255+ 9194 01           	DEFB	0x01
+ 256+ 9195 70 91        	DEFW	.animateAntiClockwise
+ 257+ 9197              .borderAnimation2
+ 258+ 9197 01           	DEFB	0x01
+ 259+ 9198 54 91        	DEFW	.animateClockwise
+ 260+ 919A              .borderAnimation3
+ 261+ 919A 02           	DEFB	0x02
+ 262+ 919B 05 91 20 91  	DEFW	.animateLeftHalfAntiClockWise, .animateRightHalfClockWise
+ 263+ 919F              .borderAnimation4
+ 264+ 919F 02           	DEFB	0x02
+ 265+ 91A0 3B 91 EA 90  	DEFW	.animateLeftHalfClockWise, .animateRightHalfAntiClockWise
+ 266+ 91A4
+ 267+ 91A4              scrollSideUp
+ 268+ 91A4 62 6B        	LD		HL,DE
+ 269+ 91A6 ED 34 20 00  	ADD		HL,0x0020
+ 270+ 91AA 06 17        	LD		B,23
+ 271+ 91AC              1:
+ 272+ 91AC 7E           	LD		A,(HL)
+ 273+ 91AD 12           	LD		(DE),A
+ 274+ 91AE ED 34 20 00  	ADD		HL,0x0020
+ 275+ 91B2 ED 35 20 00  	ADD		DE,0x0020
+ 276+ 91B6 10 F4        	DJNZ	1B
+ 277+ 91B8 62 6B        	LD		HL,DE
+ 278+ 91BA C9           	RET
+ 279+ 91BB
+ 280+ 91BB              scrollSideDown
+ 281+ 91BB 62 6B        	LD		HL,DE
+ 282+ 91BD ED 34 E0 FF  	ADD		HL,-0x0020
+ 283+ 91C1 06 17        	LD		B,23
+ 284+ 91C3              1:
+ 285+ 91C3 7E           	LD		A,(HL)
+ 286+ 91C4 12           	LD		(DE),A
+ 287+ 91C5 ED 34 E0 FF  	ADD		HL,-0x0020
+ 288+ 91C9 ED 35 E0 FF  	ADD		DE,-0x0020
+ 289+ 91CD 10 F4        	DJNZ	1B
+ 290+ 91CF C9           	RET
+ 291+ 91D0
+ 292+ 91D0              colourBar
+ 293+ 91D0 79           	LD		A,C
+ 294+ 91D1 E6 7F        	AND		%01111111
+ 295+ 91D3 77           	LD		(HL), A
+ 296+ 91D4 19           	ADD		HL,DE
+ 297+ 91D5 CD DB 91     	CALL	setAndAdvanceColour
+ 298+ 91D8 10 F6        	DJNZ	colourBar
+ 299+ 91DA C9           	RET
+ 300+ 91DB
+ 301+ 91DB              setAndAdvanceColour
+ 302+ 91DB CB 79        	BIT		7,C
+ 303+ 91DD C0           	RET		NZ ; don’t advance (static colour)
+ 304+ 91DE 0C           	INC		C
+ 305+ 91DF 79           	LD		A,C
+ 306+ 91E0 E6 7F        	AND		%01111111
+ 307+ 91E2 FE 08        	CP		%00001000
+ 308+ 91E4 D8           	RET		C
+ 309+ 91E5 0E 01        	LD		C,0x01
+ 310+ 91E7 C9           	RET
+ 311+ 91E8
+ 312+ 91E8              animateBorderTicks
+ 313+ 91E8 00 02        	DEFB	0x00, 0x02
+ 314+ 91EA
+ 315+ 91EA              TRborderGraphic
+ 316+ 91EA 03 0F 1F 38  	DEFB	0x03, 0x0F, 0x1F, 0x38, 0x70, 0x70, 0xE0, 0xE0
+ 316+ 91EE 70 70 E0 E0
+ 317+ 91F2
 # file closed: cards/cardtrick/src/animationManagement.asm
-  40  91E4              	include		"./cards/cardtrick/src/openingSequenceManagement.asm"
+  48  91F2              	include		"./cards/cardtrick/src/openingSequenceManagement.asm"
 # file opened: cards/cardtrick/src/openingSequenceManagement.asm
-   1+ 91E4              openingSequence
-   2+ 91E4 CD AE 95     	CALL	initialiseDeck
-   3+ 91E7 CD C9 95     	CALL	shuffleDeck
-   4+ 91EA 01 0B 02         LD      BC,0x020B
-   5+ 91ED 11 01 00         LD      DE,0x0001
-   6+ 91F0 CD C4 8C         CALL    drawCard
-   7+ 91F3 01 0D 04         LD      BC,0x040D
-   8+ 91F6 11 02 00         LD      DE,0x0002
-   9+ 91F9 CD C4 8C         CALL    drawCard
-  10+ 91FC 3A 80 92     	LD		A,(animateCardTicks+1)
-  11+ 91FF 32 7F 92     	LD		(animateCardTicks),A
-  12+ 9202 11 28 40     	LD		DE,0x4030-16/2
-  13+ 9205 21 83 92     	LD		HL,cardTrickMessge
-  14+ 9208 06 10        	LD		B,16
-  15+ 920A CD 8A 8F     	CALL    prntStringDblHgt
-  16+ 920D 3E 0A            LD      A,10
-  17+ 920F CD 96 8F         CALL    waitForFrames
-  18+ 9212 11 CA 40         LD      DE,0x40D0 - 12/2
-  19+ 9215 21 94 92         LD      HL,welcomeString
-  20+ 9218 06 0C            LD      B,12
-  21+ 921A CD A8 8F         CALL    prntFadingString
-  22+ 921D 3E 0A            LD      A,10
-  23+ 921F CD 96 8F         CALL    waitForFrames
-  24+ 9222 11 C5 40         LD      DE,0x40D0 - 22/2
-  25+ 9225 21 A1 92         LD      HL,amazingString
-  26+ 9228 06 16            LD      B,22
-  27+ 922A CD A8 8F         CALL    prntFadingString
-  28+ 922D 3E 05            LD      A,5
-  29+ 922F CD 96 8F         CALL    waitForFrames
-  30+ 9232 11 C5 40         LD      DE,0x40D0 - 22/2
-  31+ 9235 21 B8 92         LD      HL,pressEnterString
-  32+ 9238 06 16            LD      B,22
-  33+ 923A CD 8A 8F         CALL    prntStringDblHgt
-  34+ 923D AF           	XOR		A
-  35+ 923E 32 7F 92     	LD		(animateCardTicks),A
-  36+ 9241 CD 11 94         CALL	waitForEnter
-  37+ 9244 C9               RET
-  38+ 9245
-  39+ 9245              animateCard
-  40+ 9245 21 7F 92     	LD		HL,animateCardTicks
-  41+ 9248 7E           	LD		A,(HL)
-  42+ 9249 A7           	AND		A
-  43+ 924A C8           	RET		Z
-  44+ 924B 35           	DEC		(HL)
-  45+ 924C C0           	RET		NZ
-  46+ 924D 23           	INC		HL
-  47+ 924E 7E           	LD		A,(HL)
-  48+ 924F 2B           	DEC		HL
-  49+ 9250 77           	LD		(HL),A
-  50+ 9251 21 81 92         LD		HL,animatedHPos
-  51+ 9254 46           	LD		B,(HL)
-  52+ 9255 3E 03        	LD		A,3
-  53+ 9257 86           	ADD		(HL)
-  54+ 9258 FE 17        	CP 		0x17
-  55+ 925A 38 02        	JR		C,.posOK
-  56+ 925C 3E 0D        	LD		A,0x0D
-  57+ 925E              .posOK
-  58+ 925E 77           	LD		(HL),A
-  59+ 925F 23           	INC		HL
-  60+ 9260 4E           	LD		C,(HL)
-  61+ 9261 79           	LD		A,C
-  62+ 9262 EE 06        	XOR		%00000110
-  63+ 9264 77           	LD		(HL),A
-  64+ 9265 3A 7F 92         LD		A,(animateCardTicks)
-  65+ 9268 67           	LD		H,A
-  66+ 9269 ED 5F        	LD		A,R
-  67+ 926B              .tryNxtIdx
-  68+ 926B FE 34        	CP		52
-  69+ 926D 38 03        	JR		C,.aInRange
-  70+ 926F 84           	ADD		H
-  71+ 9270 18 F9        	JR		.tryNxtIdx
-  72+ 9272              .aInRange
-  73+ 9272 21 0B 96     	LD		HL,cardDeck
-  74+ 9275 ED 31        	ADD		HL, A
-  75+ 9277 7E           	LD		A,(HL)
-  76+ 9278 CD 00 96     	CALL	decodeCard
-  77+ 927B CD C4 8C         CALL    drawCard
-  78+ 927E C9           	RET
-  79+ 927F
-  80+ 927F              animateCardTicks
-  81+ 927F 00 02        	DEFB	0x00, 0x02
-  82+ 9281              animatedHPos
-  83+ 9281 13           	DEFB	0x13
-  84+ 9282              animatedVPos
-  85+ 9282 0B           	DEFB	0x0B
-  86+ 9283
-  87+ 9283              cardTrickMessge
-  88+ 9283 06 2A 2A 20  	DEFM	YELLOW_INK, "** Card Trick **"
-  88+ 9287 43 61 72 64
-  88+ 928B 20 54 72 69
-  88+ 928F 63 6B 20 2A
-  88+ 9293 2A
-  89+ 9294              welcomeString
-  90+ 9294 01 57 65 6C      DEFM    BLUE_INK, "Welcome ...."
-  90+ 9298 63 6F 6D 65
-  90+ 929C 20 2E 2E 2E
-  90+ 92A0 2E
-  91+ 92A1              amazingString
-  92+ 92A1 01 50 72 65      DEFM    BLUE_INK, "Prepare To Be Amazed !"
-  92+ 92A5 70 61 72 65
-  92+ 92A9 20 54 6F 20
-  92+ 92AD 42 65 20 41
-  92+ 92B1 6D 61 7A 65
-  92+ 92B5 64 20 21
-  93+ 92B8              pressEnterString
-  94+ 92B8 B9 20 50 72      DEFM    FLASH | WHITE_PAPER | BLUE_INK, " Press Enter To Start "
-  94+ 92BC 65 73 73 20
-  94+ 92C0 45 6E 74 65
-  94+ 92C4 72 20 54 6F
-  94+ 92C8 20 53 74 61
-  94+ 92CC 72 74 20
+   1+ 91F2              openingSequence
+   2+ 91F2 CD CA 95     	CALL	initialiseDeck
+   3+ 91F5 CD E5 95     	CALL	shuffleDeck
+   4+ 91F8 01 0B 02         LD      BC,0x020B
+   5+ 91FB 11 01 00         LD      DE,0x0001
+   6+ 91FE CD C4 8C         CALL    drawCard
+   7+ 9201 01 0D 04         LD      BC,0x040D
+   8+ 9204 11 02 00         LD      DE,0x0002
+   9+ 9207 CD C4 8C         CALL    drawCard
+  10+ 920A 3A 8E 92     	LD		A,(animateCardTicks+1)
+  11+ 920D 32 8D 92     	LD		(animateCardTicks),A
+  12+ 9210 11 28 40     	LD		DE,0x4030-16/2
+  13+ 9213 21 91 92     	LD		HL,cardTrickMessge
+  14+ 9216 06 10        	LD		B,16
+  15+ 9218 CD 7E 8F     	CALL    prntStringDblHgt
+  16+ 921B 3E 0A            LD      A,10
+  17+ 921D CD 8A 8F         CALL    waitForFrames
+  18+ 9220 11 CA 40         LD      DE,0x40D0 - 12/2
+  19+ 9223 21 A2 92         LD      HL,welcomeString
+  20+ 9226 06 0C            LD      B,12
+  21+ 9228 CD 9C 8F         CALL    prntFadingString
+  22+ 922B 3E 0A            LD      A,10
+  23+ 922D CD 8A 8F         CALL    waitForFrames
+  24+ 9230 11 C5 40         LD      DE,0x40D0 - 22/2
+  25+ 9233 21 AF 92         LD      HL,amazingString
+  26+ 9236 06 16            LD      B,22
+  27+ 9238 CD 9C 8F         CALL    prntFadingString
+  28+ 923B 3E 05            LD      A,5
+  29+ 923D CD 8A 8F         CALL    waitForFrames
+  30+ 9240 11 C5 40         LD      DE,0x40D0 - 22/2
+  31+ 9243 21 C6 92         LD      HL,pressEnterString
+  32+ 9246 06 16            LD      B,22
+  33+ 9248 CD 7E 8F         CALL    prntStringDblHgt
+  34+ 924B AF           	XOR		A
+  35+ 924C 32 8D 92     	LD		(animateCardTicks),A
+  36+ 924F CD 1F 94         CALL	waitForEnter
+  37+ 9252 C9               RET
+  38+ 9253
+  39+ 9253              animateCard
+  40+ 9253 21 8D 92     	LD		HL,animateCardTicks
+  41+ 9256 7E           	LD		A,(HL)
+  42+ 9257 A7           	AND		A
+  43+ 9258 C8           	RET		Z
+  44+ 9259 35           	DEC		(HL)
+  45+ 925A C0           	RET		NZ
+  46+ 925B 23           	INC		HL
+  47+ 925C 7E           	LD		A,(HL)
+  48+ 925D 2B           	DEC		HL
+  49+ 925E 77           	LD		(HL),A
+  50+ 925F 21 8F 92         LD		HL,animatedHPos
+  51+ 9262 46           	LD		B,(HL)
+  52+ 9263 3E 03        	LD		A,3
+  53+ 9265 86           	ADD		(HL)
+  54+ 9266 FE 17        	CP 		0x17
+  55+ 9268 38 02        	JR		C,.posOK
+  56+ 926A 3E 0D        	LD		A,0x0D
+  57+ 926C              .posOK
+  58+ 926C 77           	LD		(HL),A
+  59+ 926D 23           	INC		HL
+  60+ 926E 4E           	LD		C,(HL)
+  61+ 926F 79           	LD		A,C
+  62+ 9270 EE 06        	XOR		%00000110
+  63+ 9272 77           	LD		(HL),A
+  64+ 9273 3A 8D 92         LD		A,(animateCardTicks)
+  65+ 9276 67           	LD		H,A
+  66+ 9277 ED 5F        	LD		A,R
+  67+ 9279              .tryNxtIdx
+  68+ 9279 FE 34        	CP		52
+  69+ 927B 38 03        	JR		C,.aInRange
+  70+ 927D 84           	ADD		H
+  71+ 927E 18 F9        	JR		.tryNxtIdx
+  72+ 9280              .aInRange
+  73+ 9280 21 27 96     	LD		HL,cardDeck
+  74+ 9283 ED 31        	ADD		HL, A
+  75+ 9285 7E           	LD		A,(HL)
+  76+ 9286 CD 1C 96     	CALL	decodeCard
+  77+ 9289 CD C4 8C         CALL    drawCard
+  78+ 928C C9           	RET
+  79+ 928D
+  80+ 928D              animateCardTicks
+  81+ 928D 00 02        	DEFB	0x00, 0x02
+  82+ 928F              animatedHPos
+  83+ 928F 13           	DEFB	0x13
+  84+ 9290              animatedVPos
+  85+ 9290 0B           	DEFB	0x0B
+  86+ 9291
+  87+ 9291              cardTrickMessge
+  88+ 9291 06 2A 2A 20  	DEFM	YELLOW_INK, "** Card Trick **"
+  88+ 9295 43 61 72 64
+  88+ 9299 20 54 72 69
+  88+ 929D 63 6B 20 2A
+  88+ 92A1 2A
+  89+ 92A2              welcomeString
+  90+ 92A2 01 57 65 6C      DEFM    BLUE_INK, "Welcome ...."
+  90+ 92A6 63 6F 6D 65
+  90+ 92AA 20 2E 2E 2E
+  90+ 92AE 2E
+  91+ 92AF              amazingString
+  92+ 92AF 01 50 72 65      DEFM    BLUE_INK, "Prepare To Be Amazed !"
+  92+ 92B3 70 61 72 65
+  92+ 92B7 20 54 6F 20
+  92+ 92BB 42 65 20 41
+  92+ 92BF 6D 61 7A 65
+  92+ 92C3 64 20 21
+  93+ 92C6              pressEnterString
+  94+ 92C6 B9 20 50 72      DEFM    FLASH | WHITE_PAPER | BLUE_INK, " Press Enter To Start "
+  94+ 92CA 65 73 73 20
+  94+ 92CE 45 6E 74 65
+  94+ 92D2 72 20 54 6F
+  94+ 92D6 20 53 74 61
+  94+ 92DA 72 74 20
 # file closed: cards/cardtrick/src/openingSequenceManagement.asm
-  41  92CF              	include 	"./cards/cardtrick/src/trickManagement.asm"
+  49  92DD              	include 	"./cards/cardtrick/src/trickManagement.asm"
 # file opened: cards/cardtrick/src/trickManagement.asm
-   1+ 92CF              runCardTrick
-   2+ 92CF CD 15 90     	CALL	setUpScreen
-   3+ 92D2 CD E4 91     	CALL	openingSequence
-   4+ 92D5 CD AE 95     	CALL	initialiseDeck
-   5+ 92D8              .anotherRound
-   6+ 92D8 CD C9 95     	CALL	shuffleDeck
-   7+ 92DB CD 50 93     	CALL	selectHand
-   8+ 92DE 06 03        	LD		B,NUMBER_OF_DEALS
-   9+ 92E0              .nxtDeal
-  10+ 92E0 C5           	PUSH	BC
-  11+ 92E1 CD E2 8F     	CALL	clearScreenInsideBorder
-  12+ 92E4 78               LD		A,B
-  13+ 92E5 FE 03        	CP		NUMBER_OF_DEALS
-  14+ 92E7 28 0B        	JR		Z,.firstDeal
-  15+ 92E9 11 47 48     	LD		DE,0x4850 - 18/2
-  16+ 92EC 21 B1 94         LD		HL,shufflingMessage
-  17+ 92EF 06 12            LD		B,18
-  18+ 92F1 CD A8 8F         CALL	prntFadingString
-  19+ 92F4              .firstDeal
-  20+ 92F4 11 48 48     	LD		DE,0x4850 - 16/2
-  21+ 92F7 21 A0 94         LD		HL,dealingMessage
-  22+ 92FA 06 10            LD		B,16
-  23+ 92FC CD A8 8F         CALL	prntFadingString
-  24+ 92FF CD 5C 93     	CALL	dealHand
-  25+ 9302 CD 24 93     	CALL	makeSelection
-  26+ 9305 CD 86 93     	CALL	collectHand
-  27+ 9308 C1           	POP		BC
-  28+ 9309 10 D5        	DJNZ	.nxtDeal
-  29+ 930B CD BA 93     	CALL	selectMagicCard
-  30+ 930E 28 C8        	JR		Z,.anotherRound
-  31+ 9310 CD E2 8F     	CALL	clearScreenInsideBorder
-  32+ 9313 11 48 48     	LD		DE,0x4850 - 16/2
-  33+ 9316 21 C4 94     	LD		HL,okByeForNowMessage
-  34+ 9319 06 10        	LD		B,16
-  35+ 931B CD A8 8F     	CALL	prntFadingString
-  36+ 931E 3E 08        	LD		A,8
-  37+ 9320 CD 96 8F     	CALL	waitForFrames
-  38+ 9323 C9           	RET
-  39+ 9324
-  40+ 9324              makeSelection
-  41+ 9324 11 81 50     	LD		DE,0x5090 - 30/2
-  42+ 9327 21 2E 94     	LD		HL,whichRowMessage
-  43+ 932A 06 1E        	LD		B,30
-  44+ 932C CD 8A 8F     	CALL	prntStringDblHgt
-  45+ 932F 11 C1 50     	LD		DE,0x50D0 - 30/2
-  46+ 9332 21 4D 94     	LD		HL,optionsMessage
-  47+ 9335 06 1E        	LD		B,30
-  48+ 9337 CD 7E 8F     	CALL	prntString
-  49+ 933A 21 AD 95     	LD		HL,keyReleasedStatus
-  50+ 933D              .waitForChoice
-  51+ 933D 7E           	LD		A,(HL)
-  52+ 933E E6 07        	AND		%00000111
-  53+ 9340 28 FB        	JR		Z,.waitForChoice
-  54+ 9342 4F           	LD		C,A
-  55+ 9343 3A 4C 00     	LD		A,(frames)
-  56+ 9346 ED 4F        	LD		R,A
-  57+ 9348 AF           	XOR		A
-  58+ 9349 77           	LD		(HL),A
-  59+ 934A              .nxtShift
-  60+ 934A 3C           	INC		A
-  61+ 934B CB 19        	RR		C
-  62+ 934D 30 FB        	JR		NC,.nxtShift
-  63+ 934F C9           	RET
-  64+ 9350
-  65+ 9350              selectHand
-  66+ 9350 11 D8 94     	LD		DE,cardHand
-  67+ 9353 21 0B 96     	LD		HL,cardDeck
-  68+ 9356 01 15 00     	LD		BC,21
-  69+ 9359 ED B0        	LDIR
-  70+ 935B C9           	RET
-  71+ 935C
-  72+ 935C              dealHand
-  73+ 935C 01 01 02     	LD		BC,0x0201
-  74+ 935F 21 D8 94     	LD		HL,cardHand
-  75+ 9362              .nxtRow
-  76+ 9362 C5           	PUSH	BC
-  77+ 9363              .nxtColumn
-  78+ 9363 C5 E5        	PUSH	BC, HL
-  79+ 9365 7E           	LD		A,(HL)
-  80+ 9366 CD 00 96     	CALL	decodeCard
-  81+ 9369 CD C4 8C     	CALL	drawCard
-  82+ 936C 3E 01        	LD		A,1
-  83+ 936E CD 96 8F     	CALL	waitForFrames
-  84+ 9371 E1 C1        	POP		HL, BC
-  85+ 9373 79           	LD		A,C
-  86+ 9374 C6 04        	ADD		0x04
-  87+ 9376 4F           	LD		C,A
-  88+ 9377 FE 0C        	CP		0x0C
-  89+ 9379 23           	INC		HL
-  90+ 937A 38 E7        	JR		C,.nxtColumn
-  91+ 937C C1           	POP		BC
-  92+ 937D 78           	LD		A,B
-  93+ 937E C6 04        	ADD		0x04
-  94+ 9380 47           	LD		B,A
-  95+ 9381 FE 17        	CP		0x17
-  96+ 9383 38 DD        	JR		C,.nxtRow
-  97+ 9385 C9           	RET
-  98+ 9386
-  99+ 9386              ;
- 100+ 9386              ; collect the hand based on which row was selected
- 101+ 9386              ;
- 102+ 9386              ; A = row selected (1 - 3)
- 103+ 9386              ;
- 104+ 9386              collectHand
- 105+ 9386 11 ED 94     	LD		DE,workHand
- 106+ 9389 21 D4 94     	LD		HL,startRowLookup - 1
- 107+ 938C ED 31        	ADD		HL, A
- 108+ 938E 4E           	LD		C,(HL)
- 109+ 938F 06 03        	LD		B,0x03
- 110+ 9391              .nxtColumn
- 111+ 9391 C5           	PUSH	BC
- 112+ 9392              .nxtCard
- 113+ 9392 21 D8 94     	LD		HL,cardHand
- 114+ 9395 79           	LD		A,C
- 115+ 9396 ED 31        	ADD		HL,A
- 116+ 9398 ED A0        	LDI
- 117+ 939A 03           	INC		BC		; restore BC to what it was before the LDI
- 118+ 939B 79           	LD		A,C
- 119+ 939C C6 03        	ADD		0x03
- 120+ 939E 4F           	LD		C,A
- 121+ 939F FE 15        	CP		0x15
- 122+ 93A1 38 EF        	JR		C,.nxtCard
- 123+ 93A3 C1           	POP		BC
- 124+ 93A4 0C           	INC		C
- 125+ 93A5 79           	LD		A,C
- 126+ 93A6 FE 03        	CP		0x03
- 127+ 93A8 38 02        	JR		C,.noReset
- 128+ 93AA 0E 00        	LD		C,0x00
- 129+ 93AC              .noReset
- 130+ 93AC 10 E3        	DJNZ	.nxtColumn
- 131+ 93AE              	;
- 132+ 93AE              	; reset the hand
- 133+ 93AE              	;
- 134+ 93AE 11 D8 94     	LD		DE,cardHand
- 135+ 93B1 21 ED 94     	LD		HL,workHand
- 136+ 93B4 01 15 00     	LD		BC,21
- 137+ 93B7 ED B0        	LDIR
- 138+ 93B9 C9           	RET
- 139+ 93BA
- 140+ 93BA              selectMagicCard
- 141+ 93BA 0E 04        	LD		C,0x04
- 142+ 93BC CD 7E 90     	CALL	colourBorder
- 143+ 93BF 21 DB 91     	LD		HL,animateBorderTicks+1
- 144+ 93C2 7E           	LD		A,(HL)
- 145+ 93C3 2B           	DEC		HL
- 146+ 93C4 77           	LD		(HL),A	; activate animation
- 147+ 93C5 CD E2 8F     	CALL	clearScreenInsideBorder
- 148+ 93C8 11 62 40     	LD		DE,0x4070 - 28/2
- 149+ 93CB 21 6C 94     	LD		HL,cardSelectedMessage
- 150+ 93CE 06 1C        	LD		B,28
- 151+ 93D0 CD 8A 8F     	CALL	prntStringDblHgt
- 152+ 93D3 01 07 0B     	LD		BC,0x0B07
- 153+ 93D6 11 00 00     	LD		DE,0x0000
- 154+ 93D9 CD C4 8C     	CALL	drawCard
- 155+ 93DC CD 98 96     	CALL	playDrumRoll
- 156+ 93DF CD AF 96     	CALL	waitWhileSoundBusy
- 157+ 93E2 3A E2 94     	LD		A,(cardHand+MAGIC_CARD_OFFSET)
- 158+ 93E5 CD 00 96     	CALL	decodeCard
- 159+ 93E8 01 07 0D     	LD		BC,0x0D07
- 160+ 93EB CD C4 8C     	CALL	drawCard
- 161+ 93EE CD A2 96     	CALL	playTada
- 162+ 93F1 3E 28        	LD		A,40
- 163+ 93F3 CD 96 8F     	CALL	waitForFrames
- 164+ 93F6 11 85 50     	LD		DE,0x5090 - 22/2
- 165+ 93F9 21 89 94     	LD		HL,anotherGoMessage
- 166+ 93FC 06 16        	LD		B,22
- 167+ 93FE CD 7E 8F     	CALL	prntString
- 168+ 9401 CD 1C 94     	CALL	waitForYorN
- 169+ 9404 F5           	PUSH	AF
- 170+ 9405 21 DA 91     	LD		HL,animateBorderTicks
- 171+ 9408 36 00        	LD		(HL),0
- 172+ 940A 0E 84        	LD		C,0x84
- 173+ 940C CD 7E 90     	CALL	colourBorder
- 174+ 940F F1           	POP		AF
- 175+ 9410 C9           	RET
- 176+ 9411
- 177+ 9411              waitForEnter
- 178+ 9411 21 AD 95     	LD		HL,keyReleasedStatus
- 179+ 9414              .waitForEnter
- 180+ 9414 7E           	LD		A,(HL)
- 181+ 9415 E6 10        	AND		1 << KEY_ENTER
- 182+ 9417 28 FB        	JR		Z,.waitForEnter
- 183+ 9419 36 00        	LD		(HL),0
- 184+ 941B C9           	RET
- 185+ 941C
- 186+ 941C              waitForYorN
- 187+ 941C 21 AD 95     	LD		HL,keyReleasedStatus
- 188+ 941F              .waitForYorN
- 189+ 941F 7E           	LD		A,(HL)
- 190+ 9420 E6 60        	AND		1 << KEY_Y | 1 << KEY_N
- 191+ 9422 28 FB        	JR		Z,.waitForYorN
- 192+ 9424 3A 4C 00     	LD		A,(frames)
- 193+ 9427 ED 4F        	LD		R,A
- 194+ 9429 CB 76        	BIT		KEY_N,(HL)			; return NZ if N pressed
- 195+ 942B 36 00        	LD		(HL),0
- 196+ 942D C9           	RET
- 197+ 942E
- 198+ 942E              whichRowMessage
- 199+ 942E 03 20 57 68  	DEFM	MAGENTA_INK, " Which Row Is Your Card In ?? "
- 199+ 9432 69 63 68 20
- 199+ 9436 52 6F 77 20
- 199+ 943A 49 73 20 59
- 199+ 943E 6F 75 72 20
- 199+ 9442 43 61 72 64
- 199+ 9446 20 49 6E 20
- 199+ 944A 3F 3F 20
- 200+ 944D
- 201+ 944D              optionsMessage
- 202+ 944D 39 28 31 29  	DEFM	WHITE_PAPER | BLUE_INK, "(1) Top (2)  Middle (3) Bottom"
- 202+ 9451 20 54 6F 70
- 202+ 9455 20 28 32 29
- 202+ 9459 20 20 4D 69
- 202+ 945D 64 64 6C 65
- 202+ 9461 20 28 33 29
- 202+ 9465 20 42 6F 74
- 202+ 9469 74 6F 6D
- 203+ 946C
- 204+ 946C              cardSelectedMessage
- 205+ 946C 06 54 68 65  	DEFM	YELLOW_INK, "The Card You Selected Was :-"
- 205+ 9470 20 43 61 72
- 205+ 9474 64 20 59 6F
- 205+ 9478 75 20 53 65
- 205+ 947C 6C 65 63 74
- 205+ 9480 65 64 20 57
- 205+ 9484 61 73 20 3A
- 205+ 9488 2D
- 206+ 9489
- 207+ 9489              anotherGoMessage
- 208+ 9489 85 20 41 6E  	DEFM	FLASH | CYAN_INK, " Another Go ? (Y / N) "
- 208+ 948D 6F 74 68 65
- 208+ 9491 72 20 47 6F
- 208+ 9495 20 3F 20 28
- 208+ 9499 59 20 2F 20
- 208+ 949D 4E 29 20
- 209+ 94A0              dealingMessage
- 210+ 94A0 06 44 65 61  	DEFM	YELLOW_INK, "Dealing Cards..."
- 210+ 94A4 6C 69 6E 67
- 210+ 94A8 20 43 61 72
- 210+ 94AC 64 73 2E 2E
- 210+ 94B0 2E
- 211+ 94B1              shufflingMessage
- 212+ 94B1 06 53 68 75  	DEFM	YELLOW_INK, "Shuffling Cards..."
- 212+ 94B5 66 66 6C 69
- 212+ 94B9 6E 67 20 43
- 212+ 94BD 61 72 64 73
- 212+ 94C1 2E 2E 2E
- 213+ 94C4              okByeForNowMessage
- 214+ 94C4 03 4F 4B 2C  	DEFM	MAGENTA_INK, "OK, Bye For Now!"
- 214+ 94C8 20 42 79 65
- 214+ 94CC 20 46 6F 72
- 214+ 94D0 20 4E 6F 77
- 214+ 94D4 21
- 215+ 94D5              startRowLookup
- 216+ 94D5 02 00 01     	DEFB	0x02, 0x00, 0x01
- 217+ 94D8
- 218+ 94D8              cardHand
- 219+ 94D8 00 00 00...  	DEFS	21, 0x00
- 220+ 94ED
- 221+ 94ED              workHand
- 222+ 94ED 00 00 00...  	DEFS	21, 0x00
- 223+ 9502
+   1+ 92DD              runCardTrick
+   2+ 92DD CD 23 90     	CALL	setUpScreen
+   3+ 92E0 CD F2 91     	CALL	openingSequence
+   4+ 92E3 CD CA 95     	CALL	initialiseDeck
+   5+ 92E6              .anotherRound
+   6+ 92E6 CD E5 95     	CALL	shuffleDeck
+   7+ 92E9 CD 5E 93     	CALL	selectHand
+   8+ 92EC 06 03        	LD		B,NUMBER_OF_DEALS
+   9+ 92EE              .nxtDeal
+  10+ 92EE C5           	PUSH	BC
+  11+ 92EF CD F0 8F     	CALL	clearScreenInsideBorder
+  12+ 92F2 78               LD		A,B
+  13+ 92F3 FE 03        	CP		NUMBER_OF_DEALS
+  14+ 92F5 28 0B        	JR		Z,.firstDeal
+  15+ 92F7 11 47 48     	LD		DE,0x4850 - 18/2
+  16+ 92FA 21 C5 94         LD		HL,shufflingMessage
+  17+ 92FD 06 12            LD		B,18
+  18+ 92FF CD 9C 8F         CALL	prntFadingString
+  19+ 9302              .firstDeal
+  20+ 9302 11 48 48     	LD		DE,0x4850 - 16/2
+  21+ 9305 21 B4 94         LD		HL,dealingMessage
+  22+ 9308 06 10            LD		B,16
+  23+ 930A CD 9C 8F         CALL	prntFadingString
+  24+ 930D CD 6A 93     	CALL	dealHand
+  25+ 9310 CD 32 93     	CALL	makeSelection
+  26+ 9313 CD 94 93     	CALL	collectHand
+  27+ 9316 C1           	POP		BC
+  28+ 9317 10 D5        	DJNZ	.nxtDeal
+  29+ 9319 CD C8 93     	CALL	selectMagicCard
+  30+ 931C 28 C8        	JR		Z,.anotherRound
+  31+ 931E CD F0 8F     	CALL	clearScreenInsideBorder
+  32+ 9321 11 48 48     	LD		DE,0x4850 - 16/2
+  33+ 9324 21 D8 94     	LD		HL,okByeForNowMessage
+  34+ 9327 06 10        	LD		B,16
+  35+ 9329 CD 9C 8F     	CALL	prntFadingString
+  36+ 932C 3E 08        	LD		A,8
+  37+ 932E CD 8A 8F     	CALL	waitForFrames
+  38+ 9331 C9           	RET
+  39+ 9332
+  40+ 9332              makeSelection
+  41+ 9332 11 81 50     	LD		DE,0x5090 - 30/2
+  42+ 9335 21 42 94     	LD		HL,whichRowMessage
+  43+ 9338 06 1E        	LD		B,30
+  44+ 933A CD 7E 8F     	CALL	prntStringDblHgt
+  45+ 933D 11 C1 50     	LD		DE,0x50D0 - 30/2
+  46+ 9340 21 61 94     	LD		HL,optionsMessage
+  47+ 9343 06 1E        	LD		B,30
+  48+ 9345 CD 72 8F     	CALL	prntString
+  49+ 9348 21 C9 95     	LD		HL,keyReleasedStatus
+  50+ 934B              .waitForChoice
+  51+ 934B 7E           	LD		A,(HL)
+  52+ 934C E6 07        	AND		%00000111
+  53+ 934E 28 FB        	JR		Z,.waitForChoice
+  54+ 9350 4F           	LD		C,A
+  55+ 9351 3A 4C 00     	LD		A,(frames)
+  56+ 9354 ED 4F        	LD		R,A
+  57+ 9356 AF           	XOR		A
+  58+ 9357 77           	LD		(HL),A
+  59+ 9358              .nxtShift
+  60+ 9358 3C           	INC		A
+  61+ 9359 CB 19        	RR		C
+  62+ 935B 30 FB        	JR		NC,.nxtShift
+  63+ 935D C9           	RET
+  64+ 935E
+  65+ 935E              selectHand
+  66+ 935E 11 EC 94     	LD		DE,cardHand
+  67+ 9361 21 27 96     	LD		HL,cardDeck
+  68+ 9364 01 15 00     	LD		BC,21
+  69+ 9367 ED B0        	LDIR
+  70+ 9369 C9           	RET
+  71+ 936A
+  72+ 936A              dealHand
+  73+ 936A 01 01 02     	LD		BC,0x0201
+  74+ 936D 21 EC 94     	LD		HL,cardHand
+  75+ 9370              .nxtRow
+  76+ 9370 C5           	PUSH	BC
+  77+ 9371              .nxtColumn
+  78+ 9371 C5 E5        	PUSH	BC, HL
+  79+ 9373 7E           	LD		A,(HL)
+  80+ 9374 CD 1C 96     	CALL	decodeCard
+  81+ 9377 CD C4 8C     	CALL	drawCard
+  82+ 937A 3E 01        	LD		A,1
+  83+ 937C CD 8A 8F     	CALL	waitForFrames
+  84+ 937F E1 C1        	POP		HL, BC
+  85+ 9381 79           	LD		A,C
+  86+ 9382 C6 04        	ADD		0x04
+  87+ 9384 4F           	LD		C,A
+  88+ 9385 FE 0C        	CP		0x0C
+  89+ 9387 23           	INC		HL
+  90+ 9388 38 E7        	JR		C,.nxtColumn
+  91+ 938A C1           	POP		BC
+  92+ 938B 78           	LD		A,B
+  93+ 938C C6 04        	ADD		0x04
+  94+ 938E 47           	LD		B,A
+  95+ 938F FE 17        	CP		0x17
+  96+ 9391 38 DD        	JR		C,.nxtRow
+  97+ 9393 C9           	RET
+  98+ 9394
+  99+ 9394              ;
+ 100+ 9394              ; collect the hand based on which row was selected
+ 101+ 9394              ;
+ 102+ 9394              ; A = row selected (1 - 3)
+ 103+ 9394              ;
+ 104+ 9394              collectHand
+ 105+ 9394 11 01 95     	LD		DE,workHand
+ 106+ 9397 21 E8 94     	LD		HL,startRowLookup - 1
+ 107+ 939A ED 31        	ADD		HL, A
+ 108+ 939C 4E           	LD		C,(HL)
+ 109+ 939D 06 03        	LD		B,0x03
+ 110+ 939F              .nxtColumn
+ 111+ 939F C5           	PUSH	BC
+ 112+ 93A0              .nxtCard
+ 113+ 93A0 21 EC 94     	LD		HL,cardHand
+ 114+ 93A3 79           	LD		A,C
+ 115+ 93A4 ED 31        	ADD		HL,A
+ 116+ 93A6 ED A0        	LDI
+ 117+ 93A8 03           	INC		BC		; restore BC to what it was before the LDI
+ 118+ 93A9 79           	LD		A,C
+ 119+ 93AA C6 03        	ADD		0x03
+ 120+ 93AC 4F           	LD		C,A
+ 121+ 93AD FE 15        	CP		0x15
+ 122+ 93AF 38 EF        	JR		C,.nxtCard
+ 123+ 93B1 C1           	POP		BC
+ 124+ 93B2 0C           	INC		C
+ 125+ 93B3 79           	LD		A,C
+ 126+ 93B4 FE 03        	CP		0x03
+ 127+ 93B6 38 02        	JR		C,.noReset
+ 128+ 93B8 0E 00        	LD		C,0x00
+ 129+ 93BA              .noReset
+ 130+ 93BA 10 E3        	DJNZ	.nxtColumn
+ 131+ 93BC              	;
+ 132+ 93BC              	; reset the hand
+ 133+ 93BC              	;
+ 134+ 93BC 11 EC 94     	LD		DE,cardHand
+ 135+ 93BF 21 01 95     	LD		HL,workHand
+ 136+ 93C2 01 15 00     	LD		BC,21
+ 137+ 93C5 ED B0        	LDIR
+ 138+ 93C7 C9           	RET
+ 139+ 93C8
+ 140+ 93C8              selectMagicCard
+ 141+ 93C8 0E 04        	LD		C,0x04
+ 142+ 93CA CD 8C 90     	CALL	colourBorder
+ 143+ 93CD 21 E9 91     	LD		HL,animateBorderTicks+1
+ 144+ 93D0 7E           	LD		A,(HL)
+ 145+ 93D1 2B           	DEC		HL
+ 146+ 93D2 77           	LD		(HL),A	; activate animation
+ 147+ 93D3 CD F0 8F     	CALL	clearScreenInsideBorder
+ 148+ 93D6 11 62 40     	LD		DE,0x4070 - 28/2
+ 149+ 93D9 21 80 94     	LD		HL,cardSelectedMessage
+ 150+ 93DC 06 1C        	LD		B,28
+ 151+ 93DE CD 7E 8F     	CALL	prntStringDblHgt
+ 152+ 93E1 01 07 0B     	LD		BC,0x0B07
+ 153+ 93E4 11 00 00     	LD		DE,0x0000
+ 154+ 93E7 CD C4 8C     	CALL	drawCard
+ 155+ 93EA CD C4 96     	CALL	playDrumRoll
+ 156+ 93ED CD D8 96     	CALL	waitWhileSoundBusy
+ 157+ 93F0 3A F6 94     	LD		A,(cardHand+MAGIC_CARD_OFFSET)
+ 158+ 93F3 CD 1C 96     	CALL	decodeCard
+ 159+ 93F6 01 07 0D     	LD		BC,0x0D07
+ 160+ 93F9 CD C4 8C     	CALL	drawCard
+ 161+ 93FC CD CE 96     	CALL	playTada
+ 162+ 93FF 3E 28        	LD		A,40
+ 163+ 9401 CD 8A 8F     	CALL	waitForFrames
+ 164+ 9404 11 85 50     	LD		DE,0x5090 - 22/2
+ 165+ 9407 21 9D 94     	LD		HL,anotherGoMessage
+ 166+ 940A 06 16        	LD		B,22
+ 167+ 940C CD 72 8F     	CALL	prntString
+ 168+ 940F CD 2D 94     	CALL	waitForYorN
+ 169+ 9412 F5           	PUSH	AF
+ 170+ 9413 21 E8 91     	LD		HL,animateBorderTicks
+ 171+ 9416 36 00        	LD		(HL),0
+ 172+ 9418 0E 84        	LD		C,0x84
+ 173+ 941A CD 8C 90     	CALL	colourBorder
+ 174+ 941D F1           	POP		AF
+ 175+ 941E C9           	RET
+ 176+ 941F
+ 177+ 941F              waitForEnter
+ 178+ 941F CD C1 95     	CALL 	clearInputBuffers
+ 179+ 9422 21 C9 95     	LD		HL,keyReleasedStatus
+ 180+ 9425              .waitForEnter
+ 181+ 9425 7E           	LD		A,(HL)
+ 182+ 9426 E6 10        	AND		1 << KEY_ENTER
+ 183+ 9428 28 FB        	JR		Z,.waitForEnter
+ 184+ 942A 36 00        	LD		(HL),0
+ 185+ 942C C9           	RET
+ 186+ 942D
+ 187+ 942D              waitForYorN
+ 188+ 942D CD C1 95     	CALL 	clearInputBuffers
+ 189+ 9430 21 C9 95     	LD		HL,keyReleasedStatus
+ 190+ 9433              .waitForYorN
+ 191+ 9433 7E           	LD		A,(HL)
+ 192+ 9434 E6 60        	AND		1 << KEY_Y | 1 << KEY_N
+ 193+ 9436 28 FB        	JR		Z,.waitForYorN
+ 194+ 9438 3A 4C 00     	LD		A,(frames)
+ 195+ 943B ED 4F        	LD		R,A
+ 196+ 943D CB 76        	BIT		KEY_N,(HL)			; return NZ if N pressed
+ 197+ 943F 36 00        	LD		(HL),0
+ 198+ 9441 C9           	RET
+ 199+ 9442
+ 200+ 9442              whichRowMessage
+ 201+ 9442 03 20 57 68  	DEFM	MAGENTA_INK, " Which Row Is Your Card In ?? "
+ 201+ 9446 69 63 68 20
+ 201+ 944A 52 6F 77 20
+ 201+ 944E 49 73 20 59
+ 201+ 9452 6F 75 72 20
+ 201+ 9456 43 61 72 64
+ 201+ 945A 20 49 6E 20
+ 201+ 945E 3F 3F 20
+ 202+ 9461
+ 203+ 9461              optionsMessage
+ 204+ 9461 39 28 31 29  	DEFM	WHITE_PAPER | BLUE_INK, "(1) Top (2)  Middle (3) Bottom"
+ 204+ 9465 20 54 6F 70
+ 204+ 9469 20 28 32 29
+ 204+ 946D 20 20 4D 69
+ 204+ 9471 64 64 6C 65
+ 204+ 9475 20 28 33 29
+ 204+ 9479 20 42 6F 74
+ 204+ 947D 74 6F 6D
+ 205+ 9480
+ 206+ 9480              cardSelectedMessage
+ 207+ 9480 06 54 68 65  	DEFM	YELLOW_INK, "The Card You Selected Was :-"
+ 207+ 9484 20 43 61 72
+ 207+ 9488 64 20 59 6F
+ 207+ 948C 75 20 53 65
+ 207+ 9490 6C 65 63 74
+ 207+ 9494 65 64 20 57
+ 207+ 9498 61 73 20 3A
+ 207+ 949C 2D
+ 208+ 949D
+ 209+ 949D              anotherGoMessage
+ 210+ 949D 85 20 41 6E  	DEFM	FLASH | CYAN_INK, " Another Go ? (Y / N) "
+ 210+ 94A1 6F 74 68 65
+ 210+ 94A5 72 20 47 6F
+ 210+ 94A9 20 3F 20 28
+ 210+ 94AD 59 20 2F 20
+ 210+ 94B1 4E 29 20
+ 211+ 94B4              dealingMessage
+ 212+ 94B4 06 44 65 61  	DEFM	YELLOW_INK, "Dealing Cards..."
+ 212+ 94B8 6C 69 6E 67
+ 212+ 94BC 20 43 61 72
+ 212+ 94C0 64 73 2E 2E
+ 212+ 94C4 2E
+ 213+ 94C5              shufflingMessage
+ 214+ 94C5 06 53 68 75  	DEFM	YELLOW_INK, "Shuffling Cards..."
+ 214+ 94C9 66 66 6C 69
+ 214+ 94CD 6E 67 20 43
+ 214+ 94D1 61 72 64 73
+ 214+ 94D5 2E 2E 2E
+ 215+ 94D8              okByeForNowMessage
+ 216+ 94D8 03 4F 4B 2C  	DEFM	MAGENTA_INK, "OK, Bye For Now!"
+ 216+ 94DC 20 42 79 65
+ 216+ 94E0 20 46 6F 72
+ 216+ 94E4 20 4E 6F 77
+ 216+ 94E8 21
+ 217+ 94E9              startRowLookup
+ 218+ 94E9 02 00 01     	DEFB	0x02, 0x00, 0x01
+ 219+ 94EC
+ 220+ 94EC              cardHand
+ 221+ 94EC 00 00 00...  	DEFS	21, 0x00
+ 222+ 9501
+ 223+ 9501              workHand
+ 224+ 9501 00 00 00...  	DEFS	21, 0x00
+ 225+ 9516
 # file closed: cards/cardtrick/src/trickManagement.asm
-  42  9502              	include 	"./cards/cardtrick/src/initManagement.asm"
+  50  9516              	include 	"./cards/cardtrick/src/initManagement.asm"
 # file opened: cards/cardtrick/src/initManagement.asm
-   1+ 9502              initialise
-   2+ 9502 3E 01        	LD		A,1
-   3+ 9504 D3 FE        	OUT		(0xFE),A
-   4+ 9506 CD 1A 95     	CALL	clearScreen
-   5+ 9509 11 01 58     	LD		DE,0x5801
-   6+ 950C 21 00 58     	LD		HL,0x5800
-   7+ 950F 01 FF 02     	LD		BC,0x2FF
-   8+ 9512 36 07        	LD		(HL),7
-   9+ 9514 ED B0        	LDIR
-  10+ 9516 CD 60 96     	CALL	ctc_init
-  11+ 9519 C9           	RET
-  12+ 951A
-  13+ 951A              clearScreen
-  14+ 951A 11 01 40     	LD		DE,0x4001
-  15+ 951D 21 00 40     	LD		HL,0x4000
-  16+ 9520 01 FF 17     	LD		BC,0x17FF
-  17+ 9523 75           	LD		(HL),L
-  18+ 9524 ED B0        	LDIR
-  19+ 9526 C9           	RET
-  20+ 9527
+   1+ 9516              initialise
+   2+ 9516 3E 01        	LD		A,1
+   3+ 9518 D3 FE        	OUT		(0xFE),A
+   4+ 951A CD 2F 95     	CALL	clearScreen
+   5+ 951D 11 01 58     	LD		DE,0x5801
+   6+ 9520 21 00 58     	LD		HL,0x5800
+   7+ 9523 01 FF 02     	LD		BC,0x2FF
+   8+ 9526 36 07        	LD		(HL),7
+   9+ 9528 ED B0        	LDIR
+  10+ 952A              	IFNDEF	DISABLE_SOUND
+  11+ 952A CD 80 96     		CALL	ctc_init
+  12+ 952D              	ENDIF
+  13+ 952D FB           	EI
+  14+ 952E C9           	RET
+  15+ 952F
+  16+ 952F              clearScreen
+  17+ 952F 11 01 40     	LD		DE,0x4001
+  18+ 9532 21 00 40     	LD		HL,0x4000
+  19+ 9535 01 FF 17     	LD		BC,0x17FF
+  20+ 9538 75           	LD		(HL),L
+  21+ 9539 ED B0        	LDIR
+  22+ 953B C9           	RET
+  23+ 953C
 # file closed: cards/cardtrick/src/initManagement.asm
-  43  9527              	include 	"./cards/cardtrick/src/inputManagement.asm"
+  51  953C              	include 	"./cards/cardtrick/src/inputManagement.asm"
 # file opened: cards/cardtrick/src/inputManagement.asm
-   1+ 9527              	MACRO SCAN_FOR_KEY port, bitToCheck, settingAddress, bitToSet
-   2+ 9527 ~            			LD HL,settingAddress
-   3+ 9527 ~            			LD BC, port << 8 | 0xFE
-   4+ 9527 ~            			IN A, (C)
-   5+ 9527 ~            			BIT bitToCheck, A
-   6+ 9527 ~            			LD A,(HL)
-   7+ 9527 ~            			RES bitToSet,(HL) ; clear pressed state flag
-   8+ 9527 ~            			JR Z,1F
-   9+ 9527 ~            			BIT bitToSet,A		; was it previously pressed?
-  10+ 9527 ~            			JR Z,2F
-  11+ 9527 ~            			INC HL			; yes, move to released state flag
-  12+ 9527 ~            1:
-  13+ 9527 ~            			SET bitToSet,(HL) ; set state flag
-  14+ 9527 ~            2:
-  15+ 9527              		ENDM
-  16+ 9527
-  17+ 9527
-  18+ 9527              KEY_1			EQU	0x00
-  19+ 9527              KEY_2			EQU	0x01
-  20+ 9527              KEY_3			EQU	0x02
-  21+ 9527              ;KEY_SPACE		EQU 0x03
-  22+ 9527              KEY_ENTER		EQU 0x04
-  23+ 9527              KEY_Y			EQU 0x05
-  24+ 9527              KEY_N			EQU	0x06
-  25+ 9527
-  26+ 9527              scanKeyboard
-  27+ 9527              	SCAN_FOR_KEY 0xF7, 0x00, keyPressedStatus, KEY_1		; "1" Key
-  27+ 9527 21 AC 95    >			LD HL,keyPressedStatus
-  27+ 952A 01 FE F7    >			LD BC, 0xF7 << 8 | 0xFE
-  27+ 952D ED 78       >			IN A, (C)
-  27+ 952F CB 47       >			BIT 0x00, A
-  27+ 9531 7E          >			LD A,(HL)
-  27+ 9532 CB 86       >			RES KEY_1,(HL) ; clear pressed state flag
-  27+ 9534 28 05       >			JR Z,1F
-  27+ 9536 CB 47       >			BIT KEY_1,A		; was it previously pressed?
-  27+ 9538 28 03       >			JR Z,2F
-  27+ 953A 23          >			INC HL			; yes, move to released state flag
-  27+ 953B             >1:
-  27+ 953B CB C6       >			SET KEY_1,(HL) ; set state flag
-  27+ 953D             >2:
-  28+ 953D              	SCAN_FOR_KEY 0xF7, 0x01, keyPressedStatus, KEY_2		; "2" Key
-  28+ 953D 21 AC 95    >			LD HL,keyPressedStatus
-  28+ 9540 01 FE F7    >			LD BC, 0xF7 << 8 | 0xFE
-  28+ 9543 ED 78       >			IN A, (C)
-  28+ 9545 CB 4F       >			BIT 0x01, A
-  28+ 9547 7E          >			LD A,(HL)
-  28+ 9548 CB 8E       >			RES KEY_2,(HL) ; clear pressed state flag
-  28+ 954A 28 05       >			JR Z,1F
-  28+ 954C CB 4F       >			BIT KEY_2,A		; was it previously pressed?
-  28+ 954E 28 03       >			JR Z,2F
-  28+ 9550 23          >			INC HL			; yes, move to released state flag
-  28+ 9551             >1:
-  28+ 9551 CB CE       >			SET KEY_2,(HL) ; set state flag
-  28+ 9553             >2:
-  29+ 9553              	SCAN_FOR_KEY 0xF7, 0x02, keyPressedStatus, KEY_3		; "3" Key
-  29+ 9553 21 AC 95    >			LD HL,keyPressedStatus
-  29+ 9556 01 FE F7    >			LD BC, 0xF7 << 8 | 0xFE
-  29+ 9559 ED 78       >			IN A, (C)
-  29+ 955B CB 57       >			BIT 0x02, A
-  29+ 955D 7E          >			LD A,(HL)
-  29+ 955E CB 96       >			RES KEY_3,(HL) ; clear pressed state flag
-  29+ 9560 28 05       >			JR Z,1F
-  29+ 9562 CB 57       >			BIT KEY_3,A		; was it previously pressed?
-  29+ 9564 28 03       >			JR Z,2F
-  29+ 9566 23          >			INC HL			; yes, move to released state flag
-  29+ 9567             >1:
-  29+ 9567 CB D6       >			SET KEY_3,(HL) ; set state flag
-  29+ 9569             >2:
-  30+ 9569              ;	SCAN_FOR_KEY 0x7F, 0x00, keyPressedStatus, KEY_SPACE	; "Space" Key
-  31+ 9569              	SCAN_FOR_KEY 0xBF, 0x00, keyPressedStatus, KEY_ENTER	; "Enter" Key
-  31+ 9569 21 AC 95    >			LD HL,keyPressedStatus
-  31+ 956C 01 FE BF    >			LD BC, 0xBF << 8 | 0xFE
-  31+ 956F ED 78       >			IN A, (C)
-  31+ 9571 CB 47       >			BIT 0x00, A
-  31+ 9573 7E          >			LD A,(HL)
-  31+ 9574 CB A6       >			RES KEY_ENTER,(HL) ; clear pressed state flag
-  31+ 9576 28 05       >			JR Z,1F
-  31+ 9578 CB 67       >			BIT KEY_ENTER,A		; was it previously pressed?
-  31+ 957A 28 03       >			JR Z,2F
-  31+ 957C 23          >			INC HL			; yes, move to released state flag
-  31+ 957D             >1:
-  31+ 957D CB E6       >			SET KEY_ENTER,(HL) ; set state flag
-  31+ 957F             >2:
-  32+ 957F              	SCAN_FOR_KEY 0xDF, 0x04, keyPressedStatus, KEY_Y		; "Y" Key
-  32+ 957F 21 AC 95    >			LD HL,keyPressedStatus
-  32+ 9582 01 FE DF    >			LD BC, 0xDF << 8 | 0xFE
-  32+ 9585 ED 78       >			IN A, (C)
-  32+ 9587 CB 67       >			BIT 0x04, A
-  32+ 9589 7E          >			LD A,(HL)
-  32+ 958A CB AE       >			RES KEY_Y,(HL) ; clear pressed state flag
-  32+ 958C 28 05       >			JR Z,1F
-  32+ 958E CB 6F       >			BIT KEY_Y,A		; was it previously pressed?
-  32+ 9590 28 03       >			JR Z,2F
-  32+ 9592 23          >			INC HL			; yes, move to released state flag
-  32+ 9593             >1:
-  32+ 9593 CB EE       >			SET KEY_Y,(HL) ; set state flag
-  32+ 9595             >2:
-  33+ 9595              	SCAN_FOR_KEY 0x7F, 0x03, keyPressedStatus, KEY_N		; "N" Key
-  33+ 9595 21 AC 95    >			LD HL,keyPressedStatus
-  33+ 9598 01 FE 7F    >			LD BC, 0x7F << 8 | 0xFE
-  33+ 959B ED 78       >			IN A, (C)
-  33+ 959D CB 5F       >			BIT 0x03, A
-  33+ 959F 7E          >			LD A,(HL)
-  33+ 95A0 CB B6       >			RES KEY_N,(HL) ; clear pressed state flag
-  33+ 95A2 28 05       >			JR Z,1F
-  33+ 95A4 CB 77       >			BIT KEY_N,A		; was it previously pressed?
-  33+ 95A6 28 03       >			JR Z,2F
-  33+ 95A8 23          >			INC HL			; yes, move to released state flag
-  33+ 95A9             >1:
-  33+ 95A9 CB F6       >			SET KEY_N,(HL) ; set state flag
-  33+ 95AB             >2:
-  34+ 95AB C9           	RET
-  35+ 95AC
-  36+ 95AC              keyPressedStatus
-  37+ 95AC 00           	DEFB	0x00
-  38+ 95AD
-  39+ 95AD              keyReleasedStatus
-  40+ 95AD 00           	DEFB	0x00
-  41+ 95AE
+   1+ 953C              	MACRO SCAN_FOR_KEY port, bitToCheck, settingAddress, bitToSet
+   2+ 953C ~            			LD HL,settingAddress
+   3+ 953C ~            			LD BC, port << 8 | 0xFE
+   4+ 953C ~            			IN A, (C)
+   5+ 953C ~            			BIT bitToCheck, A
+   6+ 953C ~            			LD A,(HL)
+   7+ 953C ~            			RES bitToSet,(HL) ; clear pressed state flag
+   8+ 953C ~            			JR Z,1F
+   9+ 953C ~            			BIT bitToSet,A		; was it previously pressed?
+  10+ 953C ~            			JR Z,2F
+  11+ 953C ~            			INC HL			; yes, move to released state flag
+  12+ 953C ~            1:
+  13+ 953C ~            			SET bitToSet,(HL) ; set state flag
+  14+ 953C ~            2:
+  15+ 953C              		ENDM
+  16+ 953C
+  17+ 953C
+  18+ 953C              KEY_1			EQU	0x00
+  19+ 953C              KEY_2			EQU	0x01
+  20+ 953C              KEY_3			EQU	0x02
+  21+ 953C              ;KEY_SPACE		EQU 0x03
+  22+ 953C              KEY_ENTER		EQU 0x04
+  23+ 953C              KEY_Y			EQU 0x05
+  24+ 953C              KEY_N			EQU	0x06
+  25+ 953C
+  26+ 953C              scanKeyboard
+  27+ 953C              	SCAN_FOR_KEY 0xF7, 0x00, keyPressedStatus, KEY_1		; "1" Key
+  27+ 953C 21 C8 95    >			LD HL,keyPressedStatus
+  27+ 953F 01 FE F7    >			LD BC, 0xF7 << 8 | 0xFE
+  27+ 9542 ED 78       >			IN A, (C)
+  27+ 9544 CB 47       >			BIT 0x00, A
+  27+ 9546 7E          >			LD A,(HL)
+  27+ 9547 CB 86       >			RES KEY_1,(HL) ; clear pressed state flag
+  27+ 9549 28 05       >			JR Z,1F
+  27+ 954B CB 47       >			BIT KEY_1,A		; was it previously pressed?
+  27+ 954D 28 03       >			JR Z,2F
+  27+ 954F 23          >			INC HL			; yes, move to released state flag
+  27+ 9550             >1:
+  27+ 9550 CB C6       >			SET KEY_1,(HL) ; set state flag
+  27+ 9552             >2:
+  28+ 9552              	SCAN_FOR_KEY 0xF7, 0x01, keyPressedStatus, KEY_2		; "2" Key
+  28+ 9552 21 C8 95    >			LD HL,keyPressedStatus
+  28+ 9555 01 FE F7    >			LD BC, 0xF7 << 8 | 0xFE
+  28+ 9558 ED 78       >			IN A, (C)
+  28+ 955A CB 4F       >			BIT 0x01, A
+  28+ 955C 7E          >			LD A,(HL)
+  28+ 955D CB 8E       >			RES KEY_2,(HL) ; clear pressed state flag
+  28+ 955F 28 05       >			JR Z,1F
+  28+ 9561 CB 4F       >			BIT KEY_2,A		; was it previously pressed?
+  28+ 9563 28 03       >			JR Z,2F
+  28+ 9565 23          >			INC HL			; yes, move to released state flag
+  28+ 9566             >1:
+  28+ 9566 CB CE       >			SET KEY_2,(HL) ; set state flag
+  28+ 9568             >2:
+  29+ 9568              	SCAN_FOR_KEY 0xF7, 0x02, keyPressedStatus, KEY_3		; "3" Key
+  29+ 9568 21 C8 95    >			LD HL,keyPressedStatus
+  29+ 956B 01 FE F7    >			LD BC, 0xF7 << 8 | 0xFE
+  29+ 956E ED 78       >			IN A, (C)
+  29+ 9570 CB 57       >			BIT 0x02, A
+  29+ 9572 7E          >			LD A,(HL)
+  29+ 9573 CB 96       >			RES KEY_3,(HL) ; clear pressed state flag
+  29+ 9575 28 05       >			JR Z,1F
+  29+ 9577 CB 57       >			BIT KEY_3,A		; was it previously pressed?
+  29+ 9579 28 03       >			JR Z,2F
+  29+ 957B 23          >			INC HL			; yes, move to released state flag
+  29+ 957C             >1:
+  29+ 957C CB D6       >			SET KEY_3,(HL) ; set state flag
+  29+ 957E             >2:
+  30+ 957E              ;	SCAN_FOR_KEY 0x7F, 0x00, keyPressedStatus, KEY_SPACE	; "Space" Key
+  31+ 957E              	SCAN_FOR_KEY 0xBF, 0x00, keyPressedStatus, KEY_ENTER	; "Enter" Key
+  31+ 957E 21 C8 95    >			LD HL,keyPressedStatus
+  31+ 9581 01 FE BF    >			LD BC, 0xBF << 8 | 0xFE
+  31+ 9584 ED 78       >			IN A, (C)
+  31+ 9586 CB 47       >			BIT 0x00, A
+  31+ 9588 7E          >			LD A,(HL)
+  31+ 9589 CB A6       >			RES KEY_ENTER,(HL) ; clear pressed state flag
+  31+ 958B 28 05       >			JR Z,1F
+  31+ 958D CB 67       >			BIT KEY_ENTER,A		; was it previously pressed?
+  31+ 958F 28 03       >			JR Z,2F
+  31+ 9591 23          >			INC HL			; yes, move to released state flag
+  31+ 9592             >1:
+  31+ 9592 CB E6       >			SET KEY_ENTER,(HL) ; set state flag
+  31+ 9594             >2:
+  32+ 9594              	SCAN_FOR_KEY 0xDF, 0x04, keyPressedStatus, KEY_Y		; "Y" Key
+  32+ 9594 21 C8 95    >			LD HL,keyPressedStatus
+  32+ 9597 01 FE DF    >			LD BC, 0xDF << 8 | 0xFE
+  32+ 959A ED 78       >			IN A, (C)
+  32+ 959C CB 67       >			BIT 0x04, A
+  32+ 959E 7E          >			LD A,(HL)
+  32+ 959F CB AE       >			RES KEY_Y,(HL) ; clear pressed state flag
+  32+ 95A1 28 05       >			JR Z,1F
+  32+ 95A3 CB 6F       >			BIT KEY_Y,A		; was it previously pressed?
+  32+ 95A5 28 03       >			JR Z,2F
+  32+ 95A7 23          >			INC HL			; yes, move to released state flag
+  32+ 95A8             >1:
+  32+ 95A8 CB EE       >			SET KEY_Y,(HL) ; set state flag
+  32+ 95AA             >2:
+  33+ 95AA              	SCAN_FOR_KEY 0x7F, 0x03, keyPressedStatus, KEY_N		; "N" Key
+  33+ 95AA 21 C8 95    >			LD HL,keyPressedStatus
+  33+ 95AD 01 FE 7F    >			LD BC, 0x7F << 8 | 0xFE
+  33+ 95B0 ED 78       >			IN A, (C)
+  33+ 95B2 CB 5F       >			BIT 0x03, A
+  33+ 95B4 7E          >			LD A,(HL)
+  33+ 95B5 CB B6       >			RES KEY_N,(HL) ; clear pressed state flag
+  33+ 95B7 28 05       >			JR Z,1F
+  33+ 95B9 CB 77       >			BIT KEY_N,A		; was it previously pressed?
+  33+ 95BB 28 03       >			JR Z,2F
+  33+ 95BD 23          >			INC HL			; yes, move to released state flag
+  33+ 95BE             >1:
+  33+ 95BE CB F6       >			SET KEY_N,(HL) ; set state flag
+  33+ 95C0             >2:
+  34+ 95C0 C9           	RET
+  35+ 95C1
+  36+ 95C1              clearInputBuffers
+  37+ 95C1 21 00 00     	LD			HL,0x0000
+  38+ 95C4 22 C8 95     	LD 			(keyPressedStatus),HL
+  39+ 95C7 C9           	RET
+  40+ 95C8
+  41+ 95C8              keyPressedStatus
+  42+ 95C8 00           	DEFB	0x00
+  43+ 95C9
+  44+ 95C9              keyReleasedStatus
+  45+ 95C9 00           	DEFB	0x00
+  46+ 95CA
 # file closed: cards/cardtrick/src/inputManagement.asm
-  44  95AE              	include 	"./cards/cardtrick/src/cardManagement.asm"
+  52  95CA              	include 	"./cards/cardtrick/src/cardManagement.asm"
 # file opened: cards/cardtrick/src/cardManagement.asm
-   1+ 95AE              ; initialise the new deck
-   2+ 95AE              ;
-   3+ 95AE              ; 1 byte per card
-   4+ 95AE              ;
-   5+ 95AE              ; high nibble:	card value (1 - Ace ... 13 King)
-   6+ 95AE              ; low nibble:	suit  (1 -Diamonds, 2, Clubs, 3, Hearts, 4 Spades)
-   7+ 95AE              ;
-   8+ 95AE              initialiseDeck
-   9+ 95AE 06 34        	LD		B,52
-  10+ 95B0 1E 01        	LD		E,0x01
-  11+ 95B2 21 0B 96     	LD		HL,cardDeck
-  12+ 95B5              .nxtSuit
-  13+ 95B5 16 01        	LD		D,0x01
-  14+ 95B7              .nxtCard
-  15+ 95B7 CD F5 95     	CALL	encodeCard
-  16+ 95BA 77           	LD		(HL),A
-  17+ 95BB 23           	INC		HL
-  18+ 95BC 14           	INC		D
-  19+ 95BD 7A           	LD		A,D
-  20+ 95BE FE 0E        	CP		0x0E
-  21+ 95C0 20 F5        	JR		NZ,.nxtCard
-  22+ 95C2 1C           	INC		E
-  23+ 95C3 7B           	LD		A,E
-  24+ 95C4 FE 05        	CP		0x05
-  25+ 95C6 38 ED        	JR		C,.nxtSuit
-  26+ 95C8 C9           	RET
-  27+ 95C9
-  28+ 95C9              shuffleDeck
-  29+ 95C9 ED 5F        	LD		A,R
-  30+ 95CB 47           	LD		B,A
-  31+ 95CC E6 0F        	AND		0x0F
-  32+ 95CE              .nxtShuffle
-  33+ 95CE C5           	PUSH	BC
-  34+ 95CF CD D6 95     	CALL	doShuffleDeck
-  35+ 95D2 C1           	POP		BC
-  36+ 95D3 10 F9        	DJNZ	.nxtShuffle
-  37+ 95D5 C9           	RET
-  38+ 95D6
-  39+ 95D6              doShuffleDeck
-  40+ 95D6 06 34        	LD		B,52
-  41+ 95D8 21 0B 96     	LD		HL,cardDeck
-  42+ 95DB
-  43+ 95DB              .suffleNxtCard
-  44+ 95DB 48           	LD		C,B
-  45+ 95DC              .nxtRnd
-  46+ 95DC ED 5F        	LD		A,R
-  47+ 95DE              .tryAgain
-  48+ 95DE FE 34        	CP		52
-  49+ 95E0 38 04        	JR		C,.idxValid
-  50+ 95E2 D6 34        	SUB		52
-  51+ 95E4 18 F8        	JR		.tryAgain
-  52+ 95E6              .idxValid
-  53+ 95E6 41           	LD		B,C
-  54+ 95E7 11 0B 96     	LD		DE,cardDeck		; point DE at random indexed card
-  55+ 95EA ED 32        	ADD		DE, A
-  56+ 95EC 4E           	LD		C,(HL)			; now swap with current card
-  57+ 95ED 1A           	LD		A,(DE)
-  58+ 95EE 77           	LD		(HL),A
-  59+ 95EF 79           	LD		A,C
-  60+ 95F0 12           	LD		(DE),A
-  61+ 95F1 23           	INC		HL
-  62+ 95F2 10 E7        	DJNZ	.suffleNxtCard
-  63+ 95F4 C9           	RET
-  64+ 95F5
-  65+ 95F5              encodeCard
-  66+ 95F5 7A           	LD		A,D
-  67+ 95F6 E6 0F        	AND		%00001111
-  68+ 95F8 ED 23        	SWAPNIB
-  69+ 95FA 4F           	LD		C,A
-  70+ 95FB 7B           	LD		A,E
-  71+ 95FC E6 0F        	AND		%00001111
-  72+ 95FE B1           	OR		C
-  73+ 95FF C9           	RET
-  74+ 9600
-  75+ 9600              decodeCard
-  76+ 9600 5F           	LD		E,A
-  77+ 9601 E6 F0        	AND		%11110000
-  78+ 9603 ED 23        	SWAPNIB
-  79+ 9605 57           	LD		D,A
-  80+ 9606 7B           	LD		A,E
-  81+ 9607 E6 0F        	AND		%00001111
-  82+ 9609 5F           	LD		E,A
-  83+ 960A C9           	RET
-  84+ 960B
-  85+ 960B              cardDeck
-  86+ 960B 00 00 00...  	DEFS	52, 0x00
+   1+ 95CA              ; initialise the new deck
+   2+ 95CA              ;
+   3+ 95CA              ; 1 byte per card
+   4+ 95CA              ;
+   5+ 95CA              ; high nibble:	card value (1 - Ace ... 13 King)
+   6+ 95CA              ; low nibble:	suit  (1 -Diamonds, 2, Clubs, 3, Hearts, 4 Spades)
+   7+ 95CA              ;
+   8+ 95CA              initialiseDeck
+   9+ 95CA 06 34        	LD		B,52
+  10+ 95CC 1E 01        	LD		E,0x01
+  11+ 95CE 21 27 96     	LD		HL,cardDeck
+  12+ 95D1              .nxtSuit
+  13+ 95D1 16 01        	LD		D,0x01
+  14+ 95D3              .nxtCard
+  15+ 95D3 CD 11 96     	CALL	encodeCard
+  16+ 95D6 77           	LD		(HL),A
+  17+ 95D7 23           	INC		HL
+  18+ 95D8 14           	INC		D
+  19+ 95D9 7A           	LD		A,D
+  20+ 95DA FE 0E        	CP		0x0E
+  21+ 95DC 20 F5        	JR		NZ,.nxtCard
+  22+ 95DE 1C           	INC		E
+  23+ 95DF 7B           	LD		A,E
+  24+ 95E0 FE 05        	CP		0x05
+  25+ 95E2 38 ED        	JR		C,.nxtSuit
+  26+ 95E4 C9           	RET
+  27+ 95E5
+  28+ 95E5              shuffleDeck
+  29+ 95E5 ED 5F        	LD		A,R
+  30+ 95E7 47           	LD		B,A
+  31+ 95E8 E6 0F        	AND		0x0F
+  32+ 95EA              .nxtShuffle
+  33+ 95EA C5           	PUSH	BC
+  34+ 95EB CD F2 95     	CALL	doShuffleDeck
+  35+ 95EE C1           	POP		BC
+  36+ 95EF 10 F9        	DJNZ	.nxtShuffle
+  37+ 95F1 C9           	RET
+  38+ 95F2
+  39+ 95F2              doShuffleDeck
+  40+ 95F2 06 34        	LD		B,52
+  41+ 95F4 21 27 96     	LD		HL,cardDeck
+  42+ 95F7
+  43+ 95F7              .suffleNxtCard
+  44+ 95F7 48           	LD		C,B
+  45+ 95F8              .nxtRnd
+  46+ 95F8 ED 5F        	LD		A,R
+  47+ 95FA              .tryAgain
+  48+ 95FA FE 34        	CP		52
+  49+ 95FC 38 04        	JR		C,.idxValid
+  50+ 95FE D6 34        	SUB		52
+  51+ 9600 18 F8        	JR		.tryAgain
+  52+ 9602              .idxValid
+  53+ 9602 41           	LD		B,C
+  54+ 9603 11 27 96     	LD		DE,cardDeck		; point DE at random indexed card
+  55+ 9606 ED 32        	ADD		DE, A
+  56+ 9608 4E           	LD		C,(HL)			; now swap with current card
+  57+ 9609 1A           	LD		A,(DE)
+  58+ 960A 77           	LD		(HL),A
+  59+ 960B 79           	LD		A,C
+  60+ 960C 12           	LD		(DE),A
+  61+ 960D 23           	INC		HL
+  62+ 960E 10 E7        	DJNZ	.suffleNxtCard
+  63+ 9610 C9           	RET
+  64+ 9611
+  65+ 9611              encodeCard
+  66+ 9611 7A           	LD		A,D
+  67+ 9612 E6 0F        	AND		%00001111
+  68+ 9614 ED 23        	SWAPNIB
+  69+ 9616 4F           	LD		C,A
+  70+ 9617 7B           	LD		A,E
+  71+ 9618 E6 0F        	AND		%00001111
+  72+ 961A B1           	OR		C
+  73+ 961B C9           	RET
+  74+ 961C
+  75+ 961C              decodeCard
+  76+ 961C 5F           	LD		E,A
+  77+ 961D E6 F0        	AND		%11110000
+  78+ 961F ED 23        	SWAPNIB
+  79+ 9621 57           	LD		D,A
+  80+ 9622 7B           	LD		A,E
+  81+ 9623 E6 0F        	AND		%00001111
+  82+ 9625 5F           	LD		E,A
+  83+ 9626 C9           	RET
+  84+ 9627
+  85+ 9627              cardDeck
+  86+ 9627 00 00 00...  	DEFS	52, 0x00
 # file closed: cards/cardtrick/src/cardManagement.asm
-  45  963F              	include 	"./cards/cardtrick/src/interruptManagement.asm"
+  53  965B              	include 	"./cards/cardtrick/src/interruptManagement.asm"
 # file opened: cards/cardtrick/src/interruptManagement.asm
-   1+ 963F              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   2+ 963F              ;
-   3+ 963F              INTCTL				EQU	0C0h	; Interrupt control
-   4+ 963F              INTEN0				EQU	0C4h	; INT EN 0
-   5+ 963F              INTEN1				EQU	0C5h	; INT EN 1
-   6+ 963F              INTEN2				EQU	0C6h	; INT EN 2
-   7+ 963F
-   8+ 963F              CTC0				EQU	183Bh	; CTC channel 0 port
-   9+ 963F              CTC1 				EQU	193Bh	; CTC channel 1 port
-  10+ 963F              CTC2 				EQU	1A3Bh	; CTC channel 2 port
-  11+ 963F              CTC3 				EQU	1B3Bh	; CTC channel 3 port
-  12+ 963F
-  13+ 963F              CTCTIMER_CONSTANT	EQU	0x0E	; Timer constant for CTC0 Driving Timing (28Mhz / 14 = 2Mhz)
-  14+ 963F
-  15+ 963F              	MACRO INIT_CTC CTC, cntrl, count
-  16+ 963F ~            		LD		BC,CTC
-  17+ 963F ~            		LD		A, cntrl
-  18+ 963F ~            		OUT		(C),A
-  19+ 963F ~            		LD		A, count
-  20+ 963F ~            		OUT		(C),A
-  21+ 963F              	ENDM
-  22+ 963F              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  23+ 963F              ;
-  24+ 963F              ;	CTC Setup
-  25+ 963F              ;
-  26+ 963F 00           	ALIGN	0x20
-  27+ 9640
-  28+ 9640              vector_table:
-  29+ 9640 00 00        	DEFW	0					; Line Interupt
-  30+ 9642 00 00        	DEFW	0					; UART0 rx
-  31+ 9644 00 00        	DEFW	0					; UART1 rx
-  32+ 9646 B8 96        	DEFW	sndHandler			; CTC0
-  33+ 9648 F8 96        	DEFW	chunkHandler		; CTC1
-  34+ 964A 00 00        	DEFW	0					; CTC2
-  35+ 964C 00 00        	DEFW	0					; CTC3
-  36+ 964E 00 00        	DEFW	0					; CTC4
-  37+ 9650 00 00        	DEFW	0					; CTC5
-  38+ 9652 00 00        	DEFW	0					; CTC6
-  39+ 9654 00 00        	DEFW	0					; CTC7
-  40+ 9656 38 00        	DEFW	RST7				; ULA
-  41+ 9658 00 00        	DEFW	0					; UART0 tx
-  42+ 965A 00 00        	DEFW	0					; UART1 tx
-  43+ 965C 00 00        	DEFW	0
-  44+ 965E 00 00        	DEFW	0
-  45+ 9660
-  46+ 9660              ctc_init:
-  47+ 9660 ED 91 C0 41  	NEXTREG INTCTL,(vector_table & %11100000) | 1		; Vector 0x00, stackless, IM2 --> isr is disabled without this
-  48+ 9664 ED 91 C4 81  	NEXTREG INTEN0,%10000001                            ; Interrupts Enable ULA & Disable Line, Disable /INT
-  49+ 9668 ED 91 C6 00  	NEXTREG INTEN2,%00000000                            ; Disable all other UART interupts
-  50+ 966C
-  51+ 966C              	IFDEF DISABLE_SOUND
-  52+ 966C ~            		; Don't need CTC interrupts if no sound
-  53+ 966C ~            		NEXTREG INTEN1,%00000000						; Disable CTC Interrupts
-  54+ 966C              	ELSE
-  55+ 966C ED 91 C5 01  		NEXTREG INTEN1,%00000001						; Enable CTC Interrupt on Channel 0 Only
-  56+ 9670              		;NEXTREG INTEN1,%00000011						; Enable CTC Interrupt on Channel 0 & 1
-  57+ 9670
-  58+ 9670              ;---------------------------------------------------------------------------------------------------------
-  59+ 9670              ; CTC Control Word Bits
-  60+ 9670              ;
-  61+ 9670              ; 7: I - Interrupt			0 Disable											1 Enable
-  62+ 9670              ; 6: M - Mode				0 Timer Mode										1 Counter Mode
-  63+ 9670              ; 5: P - Prescaler			0 16												1 256
-  64+ 9670              ; 4: E - Edge				0 Falling Edge										1 Raising Edge
-  65+ 9670              ; 3: T - Timer Trigger		0 Automatic Trigger When Time Constant Is Loaded	1 CLK/TRG Pulse Starts Timer
-  66+ 9670              ; 2: C - Time Constant		0 No Time Constant Follows							1 Time Constant Follows
-  67+ 9670              ; 1: R - Reset				0 Continued Operaion								1 Software Reset
-  68+ 9670              ; 0: V - Control or Vector	0 Vector											1 Control Word
-  69+ 9670              ;----------------------------------------------------------------------------------------------------------
-  70+ 9670              		; INT
-  71+ 9670              		; Timer
-  72+ 9670              		; 16 Prescaler
-  73+ 9670              		; Falling Edge
-  74+ 9670              		; Trigger On Count Load
-  75+ 9670              		; Time Constraint Follows
-  76+ 9670              		; Continued Operaion
-  77+ 9670              		; Control Word
-  78+ 9670              		INIT_CTC	CTC0, %10000101, 56	; Base Timer for Sound Tempo.  28Mhz / (16 * 56) = 31250Hz
-  78+ 9670 01 3B 18    >		LD		BC,CTC0
-  78+ 9673 3E 85       >		LD		A, %10000101
-  78+ 9675 ED 79       >		OUT		(C),A
-  78+ 9677 3E 38       >		LD		A, 56
-  78+ 9679 ED 79       >		OUT		(C),A
-  79+ 967B
-  80+ 967B              		; INT
-  81+ 967B              		; Timer
-  82+ 967B              		; 256 Prescaler
-  83+ 967B              		; Falling Edge
-  84+ 967B              		; Trigger On Count Load
-  85+ 967B              		; Time Constraint Follows
-  86+ 967B              		; Continued Operaion
-  87+ 967B              		; Control Word
-  88+ 967B              		;INIT_CTC	CTC1, %10101101, 192
-  89+ 967B
-  90+ 967B 3E 96        		LD      A,high vector_table
-  91+ 967D ED 47        		LD      I,A
-  92+ 967F ED 5E        		IM      2
-  93+ 9681 FB           		EI
-  94+ 9682              	ENDIF	; DISABLE_SOUND
-  95+ 9682 C9               RET
-  96+ 9683
+   1+ 965B              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   2+ 965B              ;
+   3+ 965B              INTCTL				EQU	0C0h	; Interrupt control
+   4+ 965B              INTEN0				EQU	0C4h	; INT EN 0
+   5+ 965B              INTEN1				EQU	0C5h	; INT EN 1
+   6+ 965B              INTEN2				EQU	0C6h	; INT EN 2
+   7+ 965B
+   8+ 965B              CTC0				EQU	183Bh	; CTC channel 0 port
+   9+ 965B              CTC1 				EQU	193Bh	; CTC channel 1 port
+  10+ 965B              CTC2 				EQU	1A3Bh	; CTC channel 2 port
+  11+ 965B              CTC3 				EQU	1B3Bh	; CTC channel 3 port
+  12+ 965B
+  13+ 965B              CTCTIMER_CONSTANT	EQU	0x0E	; Timer constant for CTC0 Driving Timing (28Mhz / 14 = 2Mhz)
+  14+ 965B
+  15+ 965B              	MACRO INIT_CTC CTC, cntrl, count
+  16+ 965B ~            		LD		BC,CTC
+  17+ 965B ~            		LD		A, cntrl
+  18+ 965B ~            		OUT		(C),A
+  19+ 965B ~            		LD		A, count
+  20+ 965B ~            		OUT		(C),A
+  21+ 965B              	ENDM
+  22+ 965B              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  23+ 965B              ;
+  24+ 965B              ;	CTC Setup
+  25+ 965B              ;
+  26+ 965B              	IFNDEF	DISABLE_SOUND
+  27+ 965B 00 00 00...  		ALIGN	0x20
+  28+ 9660
+  29+ 9660              vector_table:
+  30+ 9660 00 00        		DEFW	0					; Line Interupt
+  31+ 9662 00 00        		DEFW	0					; UART0 rx
+  32+ 9664 00 00        		DEFW	0					; UART1 rx
+  33+ 9666 E1 96        		DEFW	sndHandler			; CTC0
+  34+ 9668 00 00        		DEFW	0					; CTC1
+  35+ 966A 00 00        		DEFW	0					; CTC2
+  36+ 966C 00 00        		DEFW	0					; CTC3
+  37+ 966E 00 00        		DEFW	0					; CTC4
+  38+ 9670 00 00        		DEFW	0					; CTC5
+  39+ 9672 00 00        		DEFW	0					; CTC6
+  40+ 9674 00 00        		DEFW	0					; CTC7
+  41+ 9676 38 00        		DEFW	RST7				; ULA
+  42+ 9678 00 00        		DEFW	0					; UART0 tx
+  43+ 967A 00 00        		DEFW	0					; UART1 tx
+  44+ 967C 00 00        		DEFW	0
+  45+ 967E 00 00        		DEFW	0
+  46+ 9680
+  47+ 9680              ctc_init:
+  48+ 9680 ED 91 C0 61  		NEXTREG INTCTL,(vector_table & %11100000) | 1		; Vector 0x00, stackless, IM2 --> isr is disabled without this
+  49+ 9684 ED 91 C4 81  		NEXTREG INTEN0,%10000001                            ; Interrupts Enable ULA & Disable Line, Disable /INT
+  50+ 9688 ED 91 C6 00  		NEXTREG INTEN2,%00000000                            ; Disable all other UART interupts
+  51+ 968C
+  52+ 968C ED 91 C5 01  		NEXTREG INTEN1,%00000001						; Enable CTC Interrupt on Channel 0 Only
+  53+ 9690
+  54+ 9690              ;---------------------------------------------------------------------------------------------------------
+  55+ 9690              ; CTC Control Word Bits
+  56+ 9690              ;
+  57+ 9690              ; 7: I - Interrupt			0 Disable											1 Enable
+  58+ 9690              ; 6: M - Mode				0 Timer Mode										1 Counter Mode
+  59+ 9690              ; 5: P - Prescaler			0 16												1 256
+  60+ 9690              ; 4: E - Edge				0 Falling Edge										1 Raising Edge
+  61+ 9690              ; 3: T - Timer Trigger		0 Automatic Trigger When Time Constant Is Loaded	1 CLK/TRG Pulse Starts Timer
+  62+ 9690              ; 2: C - Time Constant		0 No Time Constant Follows							1 Time Constant Follows
+  63+ 9690              ; 1: R - Reset				0 Continued Operaion								1 Software Reset
+  64+ 9690              ; 0: V - Control or Vector	0 Vector											1 Control Word
+  65+ 9690              ;----------------------------------------------------------------------------------------------------------
+  66+ 9690              		; INT
+  67+ 9690              		; Timer
+  68+ 9690              		; 16 Prescaler
+  69+ 9690              		; Falling Edge
+  70+ 9690              		; Trigger On Count Load
+  71+ 9690              		; Time Constraint Follows
+  72+ 9690              		; Continued Operaion
+  73+ 9690              		; Control Word
+  74+ 9690              		INIT_CTC	CTC0, %10000101, 56	; Base Timer for Sound Tempo.  28Mhz / (16 * 56) = 31250Hz
+  74+ 9690 01 3B 18    >		LD		BC,CTC0
+  74+ 9693 3E 85       >		LD		A, %10000101
+  74+ 9695 ED 79       >		OUT		(C),A
+  74+ 9697 3E 38       >		LD		A, 56
+  74+ 9699 ED 79       >		OUT		(C),A
+  75+ 969B
+  76+ 969B              		; INT
+  77+ 969B              		; Timer
+  78+ 969B              		; 256 Prescaler
+  79+ 969B              		; Falling Edge
+  80+ 969B              		; Trigger On Count Load
+  81+ 969B              		; Time Constraint Follows
+  82+ 969B              		; Continued Operaion
+  83+ 969B              		; Control Word
+  84+ 969B              		;INIT_CTC	CTC1, %10101101, 192
+  85+ 969B
+  86+ 969B 3E 96        		LD      A,high vector_table
+  87+ 969D ED 47        		LD      I,A
+  88+ 969F ED 5E        		IM      2
+  89+ 96A1 C9           		RET
+  90+ 96A2
+  91+ 96A2              ctc_cleanup
+  92+ 96A2 ED 91 C0 00  		NEXTREG INTCTL,0x00
+  93+ 96A6 ED 91 C4 00  		NEXTREG INTEN0,%00000000	; Disable Interrupts Disable ULA & Disable Line, Disable /INT
+  94+ 96AA ED 91 C5 00  		NEXTREG INTEN1,%00000000	; Disable CTC Interrupts
+  95+ 96AE C9           		RET
+  96+ 96AF              	ENDIF	; DISABLE_SOUND
 # file closed: cards/cardtrick/src/interruptManagement.asm
-  46  9683              	include 	"./cards/cardtrick/src/soundManagement.asm"
+  54  96AF              	include 	"./cards/cardtrick/src/soundManagement.asm"
 # file opened: cards/cardtrick/src/soundManagement.asm
-   1+ 9683              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   2+ 9683              ;
-   3+ 9683              SNDDRBANK		EQU CODEBANK + 0x01
-   4+ 9683              SNDTADABANK		EQU SNDDRBANK + 0x1C
-   5+ 9683              SNDDREND		EQU	0xCBA0
-   6+ 9683              SNDTADAEND		EQU	0xDF2E
-   7+ 9683
-   8+ 9683              DAC_B_MIRROR_NR_2C	EQU	0x2C
-   9+ 9683              DAC_AD_MIRROR_NR_2D	EQU	0x2D
-  10+ 9683              DAC_C_MIRROR_NR_2E	EQU	0x2E
-  11+ 9683
-  12+ 9683              initSound
-  13+ 9683 78           	LD		A, B
-  14+ 9684 ED 92 56     	NEXTREG	0x56, A
-  15+ 9687 32 00 97     	LD		(sndBank), A
-  16+ 968A 79           	LD		A, C
-  17+ 968B 32 01 97     	LD		(lastSndBank), A
-  18+ 968E 22 02 97     	LD		(sndEndOffset), HL
-  19+ 9691 21 00 C0     	LD		HL, 0xC000
-  20+ 9694 22 04 97     	LD		(sndDataPtr),HL
-  21+ 9697 C9           	RET
-  22+ 9698
-  23+ 9698              playDrumRoll
-  24+ 9698 01 2C 11     	LD			BC, SNDDRBANK << 8 | SNDDRBANK + 0x1B
-  25+ 969B 21 A0 CB     	LD			HL, SNDDREND
-  26+ 969E CD 83 96     	CALL		initSound
-  27+ 96A1 C9           	RET
-  28+ 96A2
-  29+ 96A2              playTada
-  30+ 96A2 CD AF 96     	CALL		waitWhileSoundBusy
-  31+ 96A5 01 47 2D     	LD			BC, SNDTADABANK << 8 | SNDTADABANK + 0x1A
-  32+ 96A8 21 2E DF     	LD			HL, SNDTADAEND
-  33+ 96AB CD 83 96     	CALL		initSound
-  34+ 96AE C9           	RET
-  35+ 96AF
-  36+ 96AF              waitWhileSoundBusy
-  37+ 96AF ED 5B 04 97  	LD		DE, (sndDataPtr)
-  38+ 96B3 7A           	LD		A, D
-  39+ 96B4 B3           	OR		E
-  40+ 96B5 20 F8        	JR		NZ, waitWhileSoundBusy
-  41+ 96B7 C9           	RET
-  42+ 96B8
-  43+ 96B8              sndHandler
-  44+ 96B8 D9           	EXX
-  45+ 96B9 08           	EX		AF,AF'
-  46+ 96BA ED 5B 04 97  	LD		DE, (sndDataPtr)
-  47+ 96BE 7A           	LD		A, D
-  48+ 96BF B3           	OR		E
-  49+ 96C0 28 31        	JR		Z, .silence
-  50+ 96C2 21 00 97     	LD		HL,sndBank
-  51+ 96C5 3A 01 97     	LD		A,(lastSndBank)
-  52+ 96C8 BE           	CP		(HL)
-  53+ 96C9 20 0D        	JR		NZ,.notLastBank
-  54+ 96CB 2A 02 97     	LD		HL,(sndEndOffset)
-  55+ 96CE A7           	AND		A
-  56+ 96CF ED 52        	SBC		HL, DE
-  57+ 96D1 20 05        	JR		NZ,.notLastBank
-  58+ 96D3 22 04 97     	LD		(sndDataPtr),HL
-  59+ 96D6 18 1B        	JR		.silence
-  60+ 96D8              .notLastBank
-  61+ 96D8 7A           	LD		A, D
-  62+ 96D9 FE E0        	CP		0xE0
-  63+ 96DB 20 08        	JR		NZ,.noNextChunk
-  64+ 96DD
-  65+ 96DD 34           	INC		(HL)
-  66+ 96DE 7E           	LD		A, (HL)
-  67+ 96DF ED 92 56     	NEXTREG	0x56, A
-  68+ 96E2 11 00 C0     	LD		DE, 0xC000
-  69+ 96E5
-  70+ 96E5              .noNextChunk
-  71+ 96E5 1A           	LD      A,(DE)                          ; grab sample
-  72+ 96E6 ED 92 2E     	NEXTREG DAC_C_MIRROR_NR_2E, A           ; send to left channel
-  73+ 96E9 13           	INC     DE
-  74+ 96EA
-  75+ 96EA 1A           	LD		A,(DE)                        ; grab sample
-  76+ 96EB ED 92 2C     	NEXTREG DAC_B_MIRROR_NR_2C, A           ; send to right channel
-  77+ 96EE 13               INC     DE
-  78+ 96EF
-  79+ 96EF ED 53 04 97  	LD		(sndDataPtr),DE
-  80+ 96F3              .silence
-  81+ 96F3 08           	EX		AF,AF'
-  82+ 96F4 D9           	EXX
-  83+ 96F5 FB           	EI
-  84+ 96F6 ED 4D        	RETI
-  85+ 96F8
-  86+ 96F8              chunkHandler
-  87+ 96F8 D9           	EXX
-  88+ 96F9 08           	EX		AF,AF
-  89+ 96FA              ;	LD		A,(loadNextChunkFlag)
-  90+ 96FA              ;	AND		A
-  91+ 96FA              ;	JR		Z, .noAction
-  92+ 96FA              ;	XOR		A
-  93+ 96FA              ;	LD		(loadNextChunkFlag), A
-  94+ 96FA
-  95+ 96FA              	;LD		HL,sndBank
-  96+ 96FA              	;LD		A,(lastSndBank)
-  97+ 96FA              	;CP		(HL)
-  98+ 96FA              	;JR		NC,.okToIncBank
-  99+ 96FA              	;LD		HL,sndEndOffset
- 100+ 96FA              	;AND 	A
- 101+ 96FA              	;SBC		HL, DE
- 102+ 96FA
- 103+ 96FA              	;JR		C,.okToIncBank
- 104+ 96FA              	;EX		DE, HL
- 105+ 96FA
- 106+ 96FA              ;	LD		HL,sndBank
- 107+ 96FA              ;	INC		(HL)
- 108+ 96FA              ;	LD		A, (HL)
- 109+ 96FA              ;	NEXTREG	0x56, A
- 110+ 96FA              ;	LD		HL, 0xC000
- 111+ 96FA              ;	LD		(sndDataPtr), HL
- 112+ 96FA              ;.noAction
- 113+ 96FA 08           	EX		AF,AF'
- 114+ 96FB D9           	EXX
- 115+ 96FC FB           	EI
- 116+ 96FD ED 4D        	RETI
- 117+ 96FF
- 118+ 96FF              loadNextChunkFlag
- 119+ 96FF 00           	DEFB	0x00
- 120+ 9700              sndBank
- 121+ 9700 00           	DEFB	0x00
- 122+ 9701              lastSndBank
- 123+ 9701 00           	DEFB	0x00
- 124+ 9702              sndEndOffset
- 125+ 9702 00 00        	DEFW	0x0000
- 126+ 9704              sndDataPtr
- 127+ 9704 00 00        	DEFW	0x0000
- 128+ 9706
+   1+ 96AF              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   2+ 96AF              ;
+   3+ 96AF              SNDDRBANK		EQU CODEBANK + 0x01
+   4+ 96AF              SNDTADABANK		EQU SNDDRBANK + 0x1C
+   5+ 96AF              SNDDREND		EQU	0xCBA0
+   6+ 96AF              SNDTADAEND		EQU	0xDF2E
+   7+ 96AF
+   8+ 96AF              DAC_B_MIRROR_NR_2C	EQU	0x2C
+   9+ 96AF              DAC_AD_MIRROR_NR_2D	EQU	0x2D
+  10+ 96AF              DAC_C_MIRROR_NR_2E	EQU	0x2E
+  11+ 96AF
+  12+ 96AF              initSound
+  13+ 96AF              	IFNDEF	DISABLE_SOUND
+  14+ 96AF 78           		LD		A, B
+  15+ 96B0 ED 92 56     		NEXTREG	0x56, A
+  16+ 96B3 32 22 97     		LD		(sndBank), A
+  17+ 96B6 79           		LD		A, C
+  18+ 96B7 32 23 97     		LD		(lastSndBank), A
+  19+ 96BA 22 24 97     		LD		(sndEndOffset), HL
+  20+ 96BD 21 00 C0     		LD		HL, 0xC000
+  21+ 96C0 22 26 97     		LD		(sndDataPtr),HL
+  22+ 96C3              	ENDIF
+  23+ 96C3 C9           	RET
+  24+ 96C4
+  25+ 96C4              playDrumRoll
+  26+ 96C4              	IFNDEF	DISABLE_SOUND
+  27+ 96C4 01 2C 11     		LD			BC, SNDDRBANK << 8 | SNDDRBANK + 0x1B
+  28+ 96C7 21 A0 CB     		LD			HL, SNDDREND
+  29+ 96CA CD AF 96     		CALL		initSound
+  30+ 96CD              	ENDIF
+  31+ 96CD C9           	RET
+  32+ 96CE
+  33+ 96CE              playTada
+  34+ 96CE              	IFNDEF	DISABLE_SOUND
+  35+ 96CE 01 47 2D     		LD			BC, SNDTADABANK << 8 | SNDTADABANK + 0x1A
+  36+ 96D1 21 2E DF     		LD			HL, SNDTADAEND
+  37+ 96D4 CD AF 96     		CALL		initSound
+  38+ 96D7              	ENDIF
+  39+ 96D7 C9           	RET
+  40+ 96D8
+  41+ 96D8              waitWhileSoundBusy
+  42+ 96D8              	IFNDEF	DISABLE_SOUND
+  43+ 96D8 ED 5B 26 97  		LD		DE, (sndDataPtr)
+  44+ 96DC 7A           		LD		A, D
+  45+ 96DD B3           		OR		E
+  46+ 96DE 20 F8        		JR		NZ, waitWhileSoundBusy
+  47+ 96E0              	ENDIF
+  48+ 96E0 C9           	RET
+  49+ 96E1
+  50+ 96E1              	IFNDEF	DISABLE_SOUND
+  51+ 96E1              sndHandler
+  52+ 96E1 D9           		EXX
+  53+ 96E2 08           		EX		AF,AF'
+  54+ 96E3 ED 5B 26 97  		LD		DE, (sndDataPtr)
+  55+ 96E7 7A           		LD		A, D
+  56+ 96E8 B3           		OR		E
+  57+ 96E9 28 31        		JR		Z, .silence
+  58+ 96EB 21 22 97     		LD		HL,sndBank
+  59+ 96EE 3A 23 97     		LD		A,(lastSndBank)
+  60+ 96F1 BE           		CP		(HL)
+  61+ 96F2 20 0D        		JR		NZ,.notLastBank
+  62+ 96F4 2A 24 97     		LD		HL,(sndEndOffset)
+  63+ 96F7 A7           		AND		A
+  64+ 96F8 ED 52        		SBC		HL, DE
+  65+ 96FA 20 05        		JR		NZ,.notLastBank
+  66+ 96FC 22 26 97     		LD		(sndDataPtr),HL
+  67+ 96FF 18 1B        		JR		.silence
+  68+ 9701              .notLastBank
+  69+ 9701 7A           		LD		A, D
+  70+ 9702 FE E0        		CP		0xE0
+  71+ 9704 20 08        		JR		NZ,.noNextChunk
+  72+ 9706
+  73+ 9706 34           		INC		(HL)
+  74+ 9707 7E           		LD		A, (HL)
+  75+ 9708 ED 92 56     		NEXTREG	0x56, A
+  76+ 970B 11 00 C0     		LD		DE, 0xC000
+  77+ 970E
+  78+ 970E              .noNextChunk
+  79+ 970E 1A           		LD      A,(DE)                          ; grab sample
+  80+ 970F ED 92 2E     		NEXTREG DAC_C_MIRROR_NR_2E, A           ; send to left channel
+  81+ 9712 13           		INC     DE
+  82+ 9713
+  83+ 9713 1A           		LD		A,(DE)                        ; grab sample
+  84+ 9714 ED 92 2C     		NEXTREG DAC_B_MIRROR_NR_2C, A           ; send to right channel
+  85+ 9717 13           		INC     DE
+  86+ 9718
+  87+ 9718 ED 53 26 97  		LD		(sndDataPtr),DE
+  88+ 971C              .silence
+  89+ 971C 08           		EX		AF,AF'
+  90+ 971D D9           		EXX
+  91+ 971E FB           		EI
+  92+ 971F ED 4D        		RETI
+  93+ 9721
+  94+ 9721              loadNextChunkFlag
+  95+ 9721 00           		DEFB	0x00
+  96+ 9722              sndBank
+  97+ 9722 00           		DEFB	0x00
+  98+ 9723              lastSndBank
+  99+ 9723 00           		DEFB	0x00
+ 100+ 9724              sndEndOffset
+ 101+ 9724 00 00        		DEFW	0x0000
+ 102+ 9726              sndDataPtr
+ 103+ 9726 00 00        		DEFW	0x0000
+ 104+ 9728              	ENDIF
+ 105+ 9728
 # file closed: cards/cardtrick/src/soundManagement.asm
-  47  9706
-  48  9706              	MMU 0, CODEBANK, 0x0000
-  49  0000              RST0:
-  50  0000 F3           		DI
-  51  0001 C3 E5 8E     		JP 		entryPoint
-  52  0004 FF FF FF FF  		DEFS	4,0xff
-  53  0008
-  54  0008              RST1:
-  55  0008 C9           		RET
-  56  0009 FF FF FF...  		DEFS	7, 0xff
-  57  0010
-  58  0010              RST2:
-  59  0010 C9           		RET
-  60  0011 FF FF FF...  		DEFS	7, 0xff
-  61  0018
-  62  0018              RST3:
-  63  0018 C9           		RET
-  64  0019 FF FF FF...  		DEFS	7, 0xff
-  65  0020
-  66  0020              RST4:
-  67  0020 C9           		RET
-  68  0021 FF FF FF...  		DEFS 	7, 0xff
-  69  0028
-  70  0028              RST5:
-  71  0028 C9           		RET
-  72  0029 FF FF FF...  		DEFS 7, 0xff
-  73  0030
-  74  0030              RST6:
-  75  0030 C9           		RET
-  76  0031 FF FF FF...  		DEFS 7, 0xff
-  77  0038
-  78  0038              RST7:
-  79  0038 D9           		EXX
-  80  0039 08           		EX		AF,AF'
-  81  003A CD 27 95     		CALL	scanKeyboard
-  82  003D CD AE 90     		CALL	animateBorder
-  83  0040 CD 45 92     		CALL	animateCard
-  84  0043 21 4C 00     		LD		HL,frames
-  85  0046 34           		INC		(HL)
-  86  0047 08           		EX		AF,AF'
-  87  0048 D9           		EXX
-  88  0049 FB           		EI
-  89  004A ED 4D        		RETI
-  90  004C              frames
-  91  004C 00           		DEFB	0x00
-  92  004D
-  93  004D              	; filname, start bank, number of 8k banks to include
-  94  004D              	;
-  95  004D              	INC_RAW "./cards/data/short_dr.raw", SNDDRBANK, 28
-  95  004D             >COUNT = 28
-  95  004D             >BNK_OFFSET = 0x00
-  95  004D             >ADDR_OFFSET = 0x0000
-  95  004D             >		WHILE COUNT > 0
-  95  004D             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
-  95  E000             >			ELSE
-  95  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  95  E000             >			ENDIF
-  95  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  E000             >COUNT = COUNT - 0x01
-  95  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
-  95  C000             >			IF COUNT > 1
-  95  C000 ~           >				INCBIN fn, ADDR_OFFSET, 0x2000
-  95  C000             >			ELSE
-  95  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET
-  95  CBA0             >			ENDIF
-  95  CBA0             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  95  CBA0             >BNK_OFFSET = BNK_OFFSET + 0x01
-  95  CBA0             >COUNT = COUNT - 0x01
-  95  CBA0             >		ENDW
-  96  CBA0              	INC_RAW "./cards/data/tada.raw", SNDTADABANK, 27
-  96  CBA0             >COUNT = 27
-  96  CBA0             >BNK_OFFSET = 0x00
-  96  CBA0             >ADDR_OFFSET = 0x0000
-  96  CBA0             >		WHILE COUNT > 0
-  96  CBA0             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
-  96  E000             >			ELSE
-  96  E000 ~           >				INCBIN fn, ADDR_OFFSET
-  96  E000             >			ENDIF
-  96  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  E000             >COUNT = COUNT - 0x01
-  96  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
-  96  C000             >			IF COUNT > 1
-  96  C000 ~           >				INCBIN fn, ADDR_OFFSET, 0x2000
-  96  C000             >			ELSE
-  96  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET
-  96  DF2E             >			ENDIF
-  96  DF2E             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
-  96  DF2E             >BNK_OFFSET = BNK_OFFSET + 0x01
-  96  DF2E             >COUNT = COUNT - 0x01
-  96  DF2E             >		ENDW
-  97  DF2E
-  98  DF2E              	SAVENEX 	OPEN "./cards/nex/cardtrick.nex", bootStrap, 0xFFFF
-  99  DF2E              	SAVENEX 	CORE 3, 0, 0
- 100  DF2E              	SAVENEX 	AUTO
- 101  DF2E              	SAVENEX 	CLOSE
- 102  DF2E
+  55  9728
+  56  9728              	MMU 0, CODEBANK, 0x0000
+  57  0000              RST0:
+  58  0000 F3           		DI
+  59  0001 C3 D6 8F     		JP 		entryPoint
+  60  0004 FF FF FF FF  		DEFS	4,0xff
+  61  0008
+  62  0008              RST1:
+  63  0008 C9           		RET
+  64  0009 FF FF FF...  		DEFS	7, 0xff
+  65  0010
+  66  0010              RST2:
+  67  0010 C9           		RET
+  68  0011 FF FF FF...  		DEFS	7, 0xff
+  69  0018
+  70  0018              RST3:
+  71  0018 C9           		RET
+  72  0019 FF FF FF...  		DEFS	7, 0xff
+  73  0020
+  74  0020              RST4:
+  75  0020 C9           		RET
+  76  0021 FF FF FF...  		DEFS 	7, 0xff
+  77  0028
+  78  0028              RST5:
+  79  0028 C9           		RET
+  80  0029 FF FF FF...  		DEFS 7, 0xff
+  81  0030
+  82  0030              RST6:
+  83  0030 C9           		RET
+  84  0031 FF FF FF...  		DEFS 7, 0xff
+  85  0038
+  86  0038              RST7:
+  87  0038 D9           		EXX
+  88  0039 08           		EX		AF,AF'
+  89  003A CD 3C 95     		CALL	scanKeyboard
+  90  003D CD BC 90     		CALL	animateBorder
+  91  0040 CD 53 92     		CALL	animateCard
+  92  0043 21 4C 00     		LD		HL,frames
+  93  0046 34           		INC		(HL)
+  94  0047 08           		EX		AF,AF'
+  95  0048 D9           		EXX
+  96  0049 FB           		EI
+  97  004A ED 4D        		RETI
+  98  004C              frames
+  99  004C 00           		DEFB	0x00
+ 100  004D
+ 101  004D              	; filname, start bank, number of 8k banks to include
+ 102  004D              	;
+ 103  004D              	INC_RAW "./cards/data/short_dr.raw", SNDDRBANK, 28
+ 103  004D             >COUNT = 28
+ 103  004D             >BNK_OFFSET = 0x00
+ 103  004D             >ADDR_OFFSET = 0x0000
+ 103  004D             >		WHILE COUNT > 0
+ 103  004D             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET, 0x2000
+ 103  E000             >			ELSE
+ 103  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 103  E000             >			ENDIF
+ 103  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  E000             >COUNT = COUNT - 0x01
+ 103  E000             >			MMU 6, SNDDRBANK + BNK_OFFSET, 0xC000
+ 103  C000             >			IF COUNT > 1
+ 103  C000 ~           >				INCBIN fn, ADDR_OFFSET, 0x2000
+ 103  C000             >			ELSE
+ 103  C000             >				INCBIN "./cards/data/short_dr.raw", ADDR_OFFSET
+ 103  CBA0             >			ENDIF
+ 103  CBA0             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 103  CBA0             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 103  CBA0             >COUNT = COUNT - 0x01
+ 103  CBA0             >		ENDW
+ 104  CBA0              	INC_RAW "./cards/data/tada.raw", SNDTADABANK, 27
+ 104  CBA0             >COUNT = 27
+ 104  CBA0             >BNK_OFFSET = 0x00
+ 104  CBA0             >ADDR_OFFSET = 0x0000
+ 104  CBA0             >		WHILE COUNT > 0
+ 104  CBA0             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET, 0x2000
+ 104  E000             >			ELSE
+ 104  E000 ~           >				INCBIN fn, ADDR_OFFSET
+ 104  E000             >			ENDIF
+ 104  E000             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  E000             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  E000             >COUNT = COUNT - 0x01
+ 104  E000             >			MMU 6, SNDTADABANK + BNK_OFFSET, 0xC000
+ 104  C000             >			IF COUNT > 1
+ 104  C000 ~           >				INCBIN fn, ADDR_OFFSET, 0x2000
+ 104  C000             >			ELSE
+ 104  C000             >				INCBIN "./cards/data/tada.raw", ADDR_OFFSET
+ 104  DF2E             >			ENDIF
+ 104  DF2E             >ADDR_OFFSET = ADDR_OFFSET + 0x2000
+ 104  DF2E             >BNK_OFFSET = BNK_OFFSET + 0x01
+ 104  DF2E             >COUNT = COUNT - 0x01
+ 104  DF2E             >		ENDW
+ 105  DF2E
+ 106  DF2E              	SAVENEX 	OPEN "./cards/nex/cardtrick.nex", bootStrap, 0x0000
+ 107  DF2E              	SAVENEX 	CORE 3, 0, 0
+ 108  DF2E              	SAVENEX 	AUTO
+ 109  DF2E              	SAVENEX 	CLOSE
+ 110  DF2E
 # file closed: cards/cardtrick/src/main.asm
 
 Value    Label
@@ -9045,15 +9042,15 @@ Value    Label
 0x0018 X RST3
 0x0010 X RST2
 0x0008 X RST1
-0x96FF X loadNextChunkFlag
-0x96E5   sndHandler.noNextChunk
-0x96D8   sndHandler.notLastBank
-0x96F3   sndHandler.silence
-0x9704   sndDataPtr
-0x9702   sndEndOffset
-0x9701   lastSndBank
-0x9700   sndBank
-0x9683   initSound
+0x9721 X loadNextChunkFlag
+0x970E   sndHandler.noNextChunk
+0x9701   sndHandler.notLastBank
+0x971C   sndHandler.silence
+0x9726   sndDataPtr
+0x9724   sndEndOffset
+0x9723   lastSndBank
+0x9722   sndBank
+0x96AF   initSound
 0x002E   DAC_C_MIRROR_NR_2E
 0x002D X DAC_AD_MIRROR_NR_2D
 0x002C   DAC_B_MIRROR_NR_2C
@@ -9062,9 +9059,8 @@ Value    Label
 0x002D   SNDTADABANK
 0x0011   SNDDRBANK
 0x0038   RST7
-0x96F8   chunkHandler
-0x96B8   sndHandler
-0x9640   vector_table
+0x96E1   sndHandler
+0x9660   vector_table
 0x000E X CTCTIMER_CONSTANT
 0x1B3B X CTC3
 0x1A3B X CTC2
@@ -9074,114 +9070,119 @@ Value    Label
 0x00C5   INTEN1
 0x00C4   INTEN0
 0x00C0   INTCTL
-0x95E6   doShuffleDeck.idxValid
-0x95DE   doShuffleDeck.tryAgain
-0x95DC X doShuffleDeck.nxtRnd
-0x95DB   doShuffleDeck.suffleNxtCard
-0x95D6   doShuffleDeck
-0x95CE   shuffleDeck.nxtShuffle
-0x95F5   encodeCard
-0x95B7   initialiseDeck.nxtCard
-0x95B5   initialiseDeck.nxtSuit
-0x95AC   keyPressedStatus
-0x9527   scanKeyboard
+0x9602   doShuffleDeck.idxValid
+0x95FA   doShuffleDeck.tryAgain
+0x95F8 X doShuffleDeck.nxtRnd
+0x95F7   doShuffleDeck.suffleNxtCard
+0x95F2   doShuffleDeck
+0x95EA   shuffleDeck.nxtShuffle
+0x9611   encodeCard
+0x95D3   initialiseDeck.nxtCard
+0x95D1   initialiseDeck.nxtSuit
+0x95C8   keyPressedStatus
+0x953C   scanKeyboard
 0x0002   KEY_3
 0x0001   KEY_2
 0x0000   KEY_1
-0x9660   ctc_init
-0x951A   clearScreen
+0x9680   ctc_init
+0x952F   clearScreen
 0x0006   KEY_N
 0x0005   KEY_Y
-0x941F   waitForYorN.waitForYorN
+0x9433   waitForYorN.waitForYorN
 0x0004   KEY_ENTER
-0x9414   waitForEnter.waitForEnter
-0x941C   waitForYorN
-0x9489   anotherGoMessage
-0x96A2   playTada
-0x96AF   waitWhileSoundBusy
-0x9698   playDrumRoll
-0x946C   cardSelectedMessage
-0x93AC   collectHand.noReset
-0x9392   collectHand.nxtCard
-0x9391   collectHand.nxtColumn
-0x94D5   startRowLookup
-0x94ED   workHand
-0x9363   dealHand.nxtColumn
-0x9362   dealHand.nxtRow
-0x934A   makeSelection.nxtShift
-0x933D   makeSelection.waitForChoice
-0x95AD   keyReleasedStatus
-0x944D   optionsMessage
-0x942E   whichRowMessage
-0x94C4   okByeForNowMessage
-0x93BA   selectMagicCard
-0x9386   collectHand
-0x9324   makeSelection
-0x935C   dealHand
-0x94A0   dealingMessage
-0x94B1   shufflingMessage
-0x92F4   runCardTrick.firstDeal
-0x92E0   runCardTrick.nxtDeal
-0x9350   selectHand
-0x92D8   runCardTrick.anotherRound
-0x9282 X animatedVPos
-0x9600   decodeCard
-0x960B   cardDeck
-0x9272   animateCard.aInRange
-0x926B   animateCard.tryNxtIdx
-0x925E   animateCard.posOK
-0x9281   animatedHPos
-0x9245   animateCard
-0x9411   waitForEnter
-0x92B8   pressEnterString
-0x92A1   amazingString
-0x9294   welcomeString
-0x9283   cardTrickMessge
-0x927F   animateCardTicks
-0x95C9   shuffleDeck
-0x95AE   initialiseDeck
-0x91E4   openingSequence
-0x91CD   setAndAdvanceColour
-0x9191   animateBorder.borderAnimation4
-0x918C   animateBorder.borderAnimation3
-0x9189   animateBorder.borderAnimation2
-0x9162   animateBorder.animateAntiClockwise
-0x9146   animateBorder.animateClockwise
-0x912D   animateBorder.animateLeftHalfClockWise
-0x9112   animateBorder.animateRightHalfClockWise
-0x91AD   scrollSideDown
-0x90F7   animateBorder.animateLeftHalfAntiClockWise
-0x9196   scrollSideUp
-0x90DC   animateBorder.animateRightHalfAntiClockWise
-0x90D7   animateBorder.animateBorderReturn
-0x90CB   animateBorder.animateNxtSection
-0x94D8   cardHand
-0x917E   animateBorder.borderAnimationTable
-0x91DA   animateBorderTicks
-0x90AE   animateBorder
-0x91C2   colourBar
-0x91DC   TRborderGraphic
-0x907E   colourBorder
-0x9015   setUpScreen
-0x9001   clearScreenInsideBorder.clrNxtPixelLine
-0x8FE8   clearScreenInsideBorder.clrNxtAttrLine
-0x8FE2   clearScreenInsideBorder
-0x8FC9   prntFadingString.nxtByte
-0x8FC2   prntFadingString.nxtInSequence
-0x8FDD   fadeAttrSequence
-0x8FA8   prntFadingString
-0x8F9D   waitForFrames.waitForFrame
-0x8F9C   waitForFrames.waitNxtInt
+0x9425   waitForEnter.waitForEnter
+0x95C1   clearInputBuffers
+0x942D   waitForYorN
+0x949D   anotherGoMessage
+0x96CE   playTada
+0x96D8   waitWhileSoundBusy
+0x96C4   playDrumRoll
+0x9480   cardSelectedMessage
+0x93BA   collectHand.noReset
+0x93A0   collectHand.nxtCard
+0x939F   collectHand.nxtColumn
+0x94E9   startRowLookup
+0x9501   workHand
+0x9371   dealHand.nxtColumn
+0x9370   dealHand.nxtRow
+0x9358   makeSelection.nxtShift
+0x934B   makeSelection.waitForChoice
+0x95C9   keyReleasedStatus
+0x9461   optionsMessage
+0x9442   whichRowMessage
+0x94D8   okByeForNowMessage
+0x93C8   selectMagicCard
+0x9394   collectHand
+0x9332   makeSelection
+0x936A   dealHand
+0x94B4   dealingMessage
+0x94C5   shufflingMessage
+0x9302   runCardTrick.firstDeal
+0x92EE   runCardTrick.nxtDeal
+0x935E   selectHand
+0x92E6   runCardTrick.anotherRound
+0x9290 X animatedVPos
+0x961C   decodeCard
+0x9627   cardDeck
+0x9280   animateCard.aInRange
+0x9279   animateCard.tryNxtIdx
+0x926C   animateCard.posOK
+0x928F   animatedHPos
+0x9253   animateCard
+0x941F   waitForEnter
+0x92C6   pressEnterString
+0x92AF   amazingString
+0x92A2   welcomeString
+0x9291   cardTrickMessge
+0x928D   animateCardTicks
+0x95E5   shuffleDeck
+0x95CA   initialiseDeck
+0x91F2   openingSequence
+0x91DB   setAndAdvanceColour
+0x919F   animateBorder.borderAnimation4
+0x919A   animateBorder.borderAnimation3
+0x9197   animateBorder.borderAnimation2
+0x9170   animateBorder.animateAntiClockwise
+0x9154   animateBorder.animateClockwise
+0x913B   animateBorder.animateLeftHalfClockWise
+0x9120   animateBorder.animateRightHalfClockWise
+0x91BB   scrollSideDown
+0x9105   animateBorder.animateLeftHalfAntiClockWise
+0x91A4   scrollSideUp
+0x90EA   animateBorder.animateRightHalfAntiClockWise
+0x90E5   animateBorder.animateBorderReturn
+0x90D9   animateBorder.animateNxtSection
+0x94EC   cardHand
+0x918C   animateBorder.borderAnimationTable
+0x91E8   animateBorderTicks
+0x90BC   animateBorder
+0x91D0   colourBar
+0x91EA   TRborderGraphic
+0x908C   colourBorder
+0x9023   setUpScreen
+0x900F   clearScreenInsideBorder.clrNxtPixelLine
+0x8FF6   clearScreenInsideBorder.clrNxtAttrLine
+0x8FF0   clearScreenInsideBorder
+0x96A2   ctc_cleanup
+0x92DD   runCardTrick
+0x9516   initialise
+0x8FD6   entryPoint
+0x8FBD   prntFadingString.nxtByte
+0x8FB6   prntFadingString.nxtInSequence
+0x8FD1   fadeAttrSequence
+0x8F9C   prntFadingString
+0x8F91   waitForFrames.waitForFrame
+0x8F90   waitForFrames.waitNxtInt
 0x004C   frames
-0x8F96   waitForFrames
-0x8F8C   prntStringDblHgt.prntStringDblHgt
-0x8F8A   prntStringDblHgt
-0x8F80   prntString.prntString
-0x8F7E   prntString
-0x8F25   prntCharDblHgt
-0x8F03   prntChar
-0x8EF8   computeCharAddress
-0x8EF1   printRST16
+0x8F8A   waitForFrames
+0x8F80   prntStringDblHgt.prntStringDblHgt
+0x8F7E   prntStringDblHgt
+0x8F74   prntString.prntString
+0x8F72   prntString
+0x8F19   prntCharDblHgt
+0x8EF7   prntChar
+0x8EEC   computeCharAddress
+0x8EE5   printRST16
 0x0080   FLASH
 0x0040   BRIGHT
 0x0038   WHITE_PAPER
@@ -9200,6 +9201,7 @@ Value    Label
 0x0002   RED_INK
 0x0001   BLUE_INK
 0x0000   BLACK_INK
+0x0007   TURBO_CONTROL_NR_07
 0x0058 X iy_MEMBOT
 0x0057 X iy_PFLAG
 0x0052 X iy_SCR_CT
@@ -9324,9 +9326,6 @@ Value    Label
 0x0030 X BC_SPACES_r3
 0x0020 X NEXT_CHAR_r3
 0x0018 X GET_CHAR_r3
-0x92CF   runCardTrick
-0x9502   initialise
-0x8EE5   entryPoint
 0x000D X CARD_START_X
 0x000B X VERT_STEP
 0x0001   HORIZ_STEP
@@ -9349,7 +9348,7 @@ Value    Label
 0x8D99   nxtAttrLine
 0x8D93   redCard
 0x8D94   drawCardBackground
-0x9186   animateBorder.borderAnimation1
+0x9194   animateBorder.borderAnimation1
 0x8D59   drawCornerCharacters
 0x8D48   advanceCharacterLine
 0x8D38   advanceScreenAddress

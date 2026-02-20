@@ -139,6 +139,8 @@ iy_SCR_CT       equ     SCR_CT-ERR_NR
 iy_PFLAG        equ     P_FLAG-ERR_NR
 iy_MEMBOT       equ     MEMBOT-ERR_NR
 
+TURBO_CONTROL_NR_07             equ $07
+
 BLACK_INK			EQU %00000000
 BLUE_INK			EQU %00000001
 RED_INK				EQU %00000010

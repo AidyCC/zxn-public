@@ -7,7 +7,7 @@
 	CSPECTMAP	"./cards/obj/cardTrick.map"
 	
 CODEBANK		EQU 0x10
-
+	;DEFINE		DISABLE_SOUND
 
 	ORG	0x8000
 
@@ -27,15 +27,23 @@ MAGIC_CARD_OFFSET	EQU	0x0A
 HORIZ_STEP			EQU	(18-10)/(CARDS_PER_ROW-1)
 VERT_STEP			EQU	(30-8)/(CARDS_PER_COLUMN-1)
 CARD_START_X		EQU	16 - ((HORIZ_STEP*CARDS_PER_ROW)/2)
+	
+	include		"./utils/src/utils.asm"
 
 entryPoint
 	CALL		initialise
 	CALL		runCardTrick
 	DI
+	NEXTREG		TURBO_CONTROL_NR_07,%00000011	
 	NEXTREG		0x50, 0xFF
+	IFNDEF	DISABLE_SOUND
+		CALL 		ctc_cleanup
+		NEXTREG		0x56, 0x00
+		IM			1
+	ENDIF
+	EI
 	RST			RST0
 
-	include		"./utils/src/utils.asm"
 	include		"./cards/cardtrick/src/animationManagement.asm"
 	include		"./cards/cardtrick/src/openingSequenceManagement.asm"
 	include 	"./cards/cardtrick/src/trickManagement.asm"
@@ -95,7 +103,7 @@ frames
 	INC_RAW "./cards/data/short_dr.raw", SNDDRBANK, 28
 	INC_RAW "./cards/data/tada.raw", SNDTADABANK, 27
 
-	SAVENEX 	OPEN "./cards/nex/cardtrick.nex", bootStrap, 0xFFFF
+	SAVENEX 	OPEN "./cards/nex/cardtrick.nex", bootStrap, 0x0000
 	SAVENEX 	CORE 3, 0, 0
 	SAVENEX 	AUTO
 	SAVENEX 	CLOSE

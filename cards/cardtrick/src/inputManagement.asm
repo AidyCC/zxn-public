@@ -33,6 +33,11 @@ scanKeyboard
 	SCAN_FOR_KEY 0x7F, 0x03, keyPressedStatus, KEY_N		; "N" Key
 	RET
 
+clearInputBuffers
+	LD			HL,0x0000
+	LD 			(keyPressedStatus),HL
+	RET
+
 keyPressedStatus
 	DEFB	0x00
 

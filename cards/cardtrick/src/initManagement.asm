@@ -7,7 +7,10 @@ initialise
 	LD		BC,0x2FF
 	LD		(HL),7
 	LDIR
-	CALL	ctc_init
+	IFNDEF	DISABLE_SOUND
+		CALL	ctc_init
+	ENDIF
+	EI
 	RET
 
 clearScreen

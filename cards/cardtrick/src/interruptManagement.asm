@@ -23,38 +23,34 @@ CTCTIMER_CONSTANT	EQU	0x0E	; Timer constant for CTC0 Driving Timing (28Mhz / 14 
 ;
 ;	CTC Setup
 ;
-	ALIGN	0x20
+	IFNDEF	DISABLE_SOUND
+		ALIGN	0x20
 	
 vector_table:
-	DEFW	0					; Line Interupt
-	DEFW	0					; UART0 rx
-	DEFW	0					; UART1 rx
-	DEFW	sndHandler			; CTC0
-	DEFW	chunkHandler		; CTC1
-	DEFW	0					; CTC2
-	DEFW	0					; CTC3
-	DEFW	0					; CTC4
-	DEFW	0					; CTC5
-	DEFW	0					; CTC6
-	DEFW	0					; CTC7
-	DEFW	RST7				; ULA
-	DEFW	0					; UART0 tx
-	DEFW	0					; UART1 tx
-	DEFW	0
-	DEFW	0
+		DEFW	0					; Line Interupt
+		DEFW	0					; UART0 rx
+		DEFW	0					; UART1 rx
+		DEFW	sndHandler			; CTC0
+		DEFW	0					; CTC1
+		DEFW	0					; CTC2
+		DEFW	0					; CTC3
+		DEFW	0					; CTC4
+		DEFW	0					; CTC5
+		DEFW	0					; CTC6
+		DEFW	0					; CTC7
+		DEFW	RST7				; ULA
+		DEFW	0					; UART0 tx
+		DEFW	0					; UART1 tx
+		DEFW	0
+		DEFW	0
 
 ctc_init:
-	NEXTREG INTCTL,(vector_table & %11100000) | 1		; Vector 0x00, stackless, IM2 --> isr is disabled without this
-	NEXTREG INTEN0,%10000001                            ; Interrupts Enable ULA & Disable Line, Disable /INT
-	NEXTREG INTEN2,%00000000                            ; Disable all other UART interupts
-	
-	IFDEF DISABLE_SOUND
-		; Don't need CTC interrupts if no sound
-		NEXTREG INTEN1,%00000000						; Disable CTC Interrupts
-	ELSE
+		NEXTREG INTCTL,(vector_table & %11100000) | 1		; Vector 0x00, stackless, IM2 --> isr is disabled without this
+		NEXTREG INTEN0,%10000001                            ; Interrupts Enable ULA & Disable Line, Disable /INT
+		NEXTREG INTEN2,%00000000                            ; Disable all other UART interupts
+		
 		NEXTREG INTEN1,%00000001						; Enable CTC Interrupt on Channel 0 Only
-		;NEXTREG INTEN1,%00000011						; Enable CTC Interrupt on Channel 0 & 1
-	
+
 ;---------------------------------------------------------------------------------------------------------
 ; CTC Control Word Bits
 ;
@@ -90,6 +86,11 @@ ctc_init:
 		LD      A,high vector_table
 		LD      I,A
 		IM      2
-		EI
+		RET
+
+ctc_cleanup
+		NEXTREG INTCTL,0x00	
+		NEXTREG INTEN0,%00000000	; Disable Interrupts Disable ULA & Disable Line, Disable /INT
+		NEXTREG INTEN1,%00000000	; Disable CTC Interrupts
+		RET
 	ENDIF	; DISABLE_SOUND
-    RET
