@@ -7,6 +7,7 @@ initialise
 	LD		BC,0x2FF
 	LD		(HL),7
 	LDIR
+	CALL	ctc_init
 	RET
 
 clearScreen

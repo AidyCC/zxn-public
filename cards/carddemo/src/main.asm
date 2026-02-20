@@ -5,24 +5,37 @@
 ;
 	DEVICE		ZXSPECTRUMNEXT
 	CSPECTMAP	"./cards/obj/carddemo.map"
-	
+LEFTX_MARGIN		EQU		0x00
+RIGHTX_MARGIN		EQU		0xA0
+TOPY_MARGIN			EQU		0x00
+BOTTOMY_MARGIN		EQU		0xFF
+
 	ORG	0x8000
 	
 	; include the cards library code
 	;
 
-	DEFINE		ZXN_CARDS_LIB
-	
-	include 	"./cards/lib/cards.asm"		; must be on a 0x0100 Aligned Address
+	IFNDEF	ZXN_CARDS_TILEMAP_LIB
+		IFNDEF	ZXN_CARDS_LIB
+			DEFINE	ZXN_CARDS_LIB	; default to using standard library if none specified
+		ENDIF
+	ENDIF
+
+	include 	"./cards/lib/cards.asm"		; must be on a 0x0100 Aligned Address (if not using TILE MAP Mode)
+
 
 cardDemo
 	XOR		A
 	OUT		(0xFE),A
-	LD		DE,0x4001
-	LD		HL,0x4000
-	LD		BC,0x1AFF
-	LD		(HL),A
-	LDIR
+	IFDEF	ZXN_CARDS_TILEMAP_LIB
+		CALL	tileMapInitialise
+	ELSE
+		LD		DE,0x4001
+		LD		HL,0x4000
+		LD		BC,0x1AFF
+		LD		(HL),A
+		LDIR
+	ENDIF
 	CALL	drawAllValueCards
 	CALL	drawBackAndJokers
 	JR		$
@@ -56,7 +69,11 @@ nxtCard
 
 drawBackAndJokers
 	LD	DE,0x0000
-	LD	BC,0x0102
+	IFDEF	ZXN_CARDS_TILEMAP_LIB
+		LD	BC,0x0504
+	ELSE
+		LD	BC,0x0102
+	ENDIF
 nxtSpCard
 	PUSH	BC
 	PUSH	DE
@@ -75,7 +92,11 @@ nxtSpCard
 	JR		NZ,nxtSpCard
 	RET
 
-	SAVENEX 	OPEN "./cards/nex/carddemo.nex", cardDemo, 0xFFFF
+	IFDEF	ZXN_CARDS_TILEMAP_LIB
+		SAVENEX 	OPEN "./cards/nex/carddemo_tm.nex", cardDemo, 0x0000
+	ELSE
+		SAVENEX 	OPEN "./cards/nex/carddemo.nex", cardDemo, 0x0000
+	ENDIF
 	SAVENEX 	CORE 3, 0, 0
 	SAVENEX 	AUTO
 	SAVENEX 	CLOSE

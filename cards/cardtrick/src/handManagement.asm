@@ -1,12 +1,12 @@
 selectHand
 	LD		DE,cardHand
 	LD		HL,cardDeck
-	LD		BC,21
+	LD		BC,CARDS_PER_ROW * CARDS_PER_COLUMN
 	LDIR
 	RET
 
 dealHand
-	LD		B,0x02
+	LD		B,CARD_START_X
 	LD		HL,cardHand
 .nxtRow
 	LD		C,0x01
@@ -19,18 +19,18 @@ dealHand
 	INC		HL
 	POP		HL, BC
 	LD		A,C
-	ADD		0x06
+	ADD		VERT_STEP
 	LD		C,A
 	CP		0x0C
 	JR		C,.nxtColumn
 	POP		BC
 	LD		A,B
-	ADD		0x04
+	ADD		HORIZ_STEP
 	LD		B,A
 	CP		0x15
 	JR		C,.nxtRow
 	RET
 
 cardHand
-	DEFS	21, 0x00
+	DEFS	CARDS_PER_ROW * CARDS_PER_COLUMN, 0x00
 	

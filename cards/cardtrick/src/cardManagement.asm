@@ -44,8 +44,11 @@ doShuffleDeck
 	LD		C,B
 .nxtRnd
 	LD		A,R
+.tryAgain
 	CP		52
-	JR		NC,.nxtRnd
+	JR		C,.idxValid
+	SUB		52
+	JR		.tryAgain
 .idxValid
 	LD		B,C
 	LD		DE,cardDeck		; point DE at random indexed card

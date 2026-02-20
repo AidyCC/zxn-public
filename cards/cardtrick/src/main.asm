@@ -19,6 +19,14 @@ bootStrap:
 	NEXTREG		0x50, CODEBANK
 	RST			RST0
 
+CARDS_PER_ROW		EQU	0x07
+CARDS_PER_COLUMN	EQU	0x03
+NUMBER_OF_DEALS		EQU	0x03
+MAGIC_CARD_OFFSET	EQU	0x0A
+HORIZ_STEP			EQU	(18-10)/(CARDS_PER_ROW-1)
+VERT_STEP			EQU	(30-8)/(CARDS_PER_COLUMN-1)
+CARD_START_X		EQU	16 - ((HORIZ_STEP*CARDS_PER_ROW)/2)
+
 entryPoint
 	CALL		initialise
 	EI
@@ -28,11 +36,14 @@ entryPoint
 	RST			RST0
 
 	include		"./utils/src/utils.asm"
+	include		"./cards/cardtrick/src/animationManagement.asm"
 	include		"./cards/cardtrick/src/openingSequenceManagement.asm"
 	include 	"./cards/cardtrick/src/trickManagement.asm"
 	include 	"./cards/cardtrick/src/initManagement.asm"
 	include 	"./cards/cardtrick/src/inputManagement.asm"
 	include 	"./cards/cardtrick/src/cardManagement.asm"
+	include 	"./cards/cardtrick/src/interruptManagement.asm"
+	include 	"./cards/cardtrick/src/soundManagement.asm"
 
 	MMU 0, CODEBANK, 0x0000
 RST0:
@@ -69,6 +80,7 @@ RST7:
 		EX		AF,AF'
 		CALL	scanKeyboard
 		CALL	animateBorder
+		CALL	animateCard
 		LD		HL,frames
 		INC		(HL)
 		EX		AF,AF'
